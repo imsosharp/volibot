@@ -132,7 +132,7 @@ namespace RitoBot
                             object obj = await connection.SetClientReceivedGameMessage(game.Id, "CHAMP_SELECT_CLIENT");
                             if (queueType != QueueTypes.ARAM)
                             {
-                                if (Program.championId != "")
+                                if (Program.championId != "" && Program.championId != "RANDOM")
                                 {
                                     await connection.SelectChampion(Enums.championToId(Program.championId));
                                     await connection.ChampionSelectCompleted();
