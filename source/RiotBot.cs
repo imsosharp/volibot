@@ -137,6 +137,13 @@ namespace RitoBot
                                     await connection.SelectChampion(Enums.championToId(Program.championId));
                                     await connection.ChampionSelectCompleted();
                                 }
+                                else if (Program.championId == "RANDOM")
+                                {
+                                    var randAvailableChampsArray = availableChampsArray.Shuffle();
+                                    await connection.SelectChampion(randAvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
+                                    await connection.ChampionSelectCompleted();
+
+                                }
                                 else
                                 {
                                     await connection.SelectChampion(availableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
