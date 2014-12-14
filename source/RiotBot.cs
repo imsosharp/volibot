@@ -80,39 +80,38 @@ namespace RitoBot
             connection.OnLogin += new LoLConnection.OnLoginHandler(this.connection_OnLogin);
             connection.OnLoginQueueUpdate += new LoLConnection.OnLoginQueueUpdateHandler(this.connection_OnLoginQueueUpdate);
             connection.OnMessageReceived += new LoLConnection.OnMessageReceivedHandler(this.connection_OnMessageReceived);
-            //you can get client version from the top of PVP.net Client, I'll update this to get it automatically from rito.
             switch (region)
             {
                 case "EUW":
-                    connection.Connect(username, password, Region.EUW, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.EUW, Program.cversion);
                     break;
                 case "EUNE":
-                    connection.Connect(username, password, Region.EUN, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.EUN, Program.cversion);
                     break;
                 case "NA":
-                    connection.Connect(username, password, Region.NA, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.NA, Program.cversion);
                     regionURL = "NA1";
                     break;
                 case "KR":
-                    connection.Connect(username, password, Region.KR, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.KR, Program.cversion);
                     break;
                 case "BR":
-                    connection.Connect(username, password, Region.BR, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.BR, Program.cversion);
                     break;
                 case "OCE":
-                    connection.Connect(username, password, Region.OCE, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.OCE, Program.cversion);
                     break;
                 case "RU":
-                    connection.Connect(username, password, Region.RU, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.RU, Program.cversion);
                     break;
                 case "TR":
-                    connection.Connect(username, password, Region.TR, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.TR, Program.cversion);
                     break;
                 case "LAS":
-                    connection.Connect(username, password, Region.LAS, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.LAS, Program.cversion);
                     break;
                 case "LAN":
-                    connection.Connect(username, password, Region.LAN, "4.21.14_12_08_11_36");
+                    connection.Connect(username, password, Region.LAN, Program.cversion);
                     break;
             }
         }

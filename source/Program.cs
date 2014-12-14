@@ -29,11 +29,12 @@ namespace RitoBot
         public static int connectedAccs = 0;
         public static string championId = "";
         public static string championId2 = "";
-        public static int maxLevel = 10;
+        public static int maxLevel = 31;
         public static bool buyBoost = false;
         public static bool rndSpell = true;
         public static string spell1 = "flash";
         public static string spell2 = "ignite";
+        public static string cversion = "";
 
         static void Main(string[] args)
         {
@@ -53,6 +54,7 @@ namespace RitoBot
             }
             Console.WriteLine(getTimestamp() + "Loading config\\accounts.txt");
             loadAccounts();
+            loadVersion();
             int curRunning = 0;
             foreach (string acc in accounts)
             {
@@ -83,6 +85,11 @@ namespace RitoBot
                 }
             }
             Console.ReadKey();
+        }
+        public static void loadVersion()
+        {
+            var versiontxt = File.OpenText(AppDomain.CurrentDomain.BaseDirectory + "config\\version.txt");
+            cversion = versiontxt.ReadLine();
         }
         public static void lognNewAccount()
         {
