@@ -93,6 +93,8 @@ namespace RitoBot
                     return 126;
                 case "JINX":
                     return 222;
+				case "KALISTA":
+					return 429;
                 case "KARMA":
                     return 43;
                 case "KARTHUS":
@@ -159,6 +161,8 @@ namespace RitoBot
                     return 78;
                 case "QUINN":
                     return 133;
+				case "REKSAI":
+					return 421;
                 case "RAMMUS":
                     return 33;
                 case "RENEKTON":
