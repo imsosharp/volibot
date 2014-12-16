@@ -555,7 +555,16 @@ namespace LoLLauncher
             if (result["result"].Equals("_error"))
             {
                 string newVersion = (string)result.GetTO("data").GetTO("rootCause").GetArray("substitutionArguments")[1];
-                Error(GetErrorMessage(result), ErrorType.Login);
+                if (newVersion != RitoBot.Program.cversion)
+                {
+                    if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "config\\version.txt"))
+                    {
+                        File.Delete(AppDomain.CurrentDomain.BaseDirectory + "config\\version.txt");
+                    }
+                    var newcversion = File.CreateText("config\\version.txt");
+                    newcversion.Write(newVersion);
+                }
+                Error("Volibot updated for version " + newVersion + ". Please restart.", ErrorType.General);
                 Disconnect();
                 return false;
             }

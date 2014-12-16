@@ -38,13 +38,16 @@ namespace RitoBot
 
         static void Main(string[] args)
         {
-            Console.Title = "RitoBot";
+            loadVersion();
+            Console.Title = "Volibot";
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.SetWindowSize(Console.WindowWidth + 5, Console.WindowHeight);
-            Console.Write("==========================================\n");
-            Console.Write("Maufeat's Volibot v1.6.0 updated for 4.21\n");
-            Console.Write("----------All features enabled!----------\n");
-            Console.Write("----------------imsosharp----------------\n");
-            Console.Write("==========================================\n");
+            Console.WriteLine("=======================================");
+            Console.WriteLine("Maufeat's Volibot up-to-date for v" + cversion.Substring(0,4));
+            Console.WriteLine("--------All features enabled!----------");
+            Console.WriteLine("--------------imsosharp----------------");
+            Console.WriteLine("=======================================");
+            Console.WriteLine();
             Console.WriteLine(getTimestamp() + "Loading config\\settings.ini");
             loadConfiguration();
             if (replaceConfig)
@@ -54,7 +57,6 @@ namespace RitoBot
             }
             Console.WriteLine(getTimestamp() + "Loading config\\accounts.txt");
             loadAccounts();
-            loadVersion();
             int curRunning = 0;
             foreach (string acc in accounts)
             {
