@@ -35,6 +35,7 @@ namespace RitoBot
         public static string spell1 = "flash";
         public static string spell2 = "ignite";
         public static string cversion = "";
+        public static bool AutoUpdate = false;
 
         static void Main(string[] args)
         {
@@ -135,6 +136,7 @@ namespace RitoBot
                 spell2 = iniFile.IniReadValue("General", "Spell2").ToUpper();
                 rndSpell = Convert.ToBoolean(iniFile.IniReadValue("General", "RndSpell"));
                 replaceConfig = Convert.ToBoolean(iniFile.IniReadValue("General", "ReplaceConfig"));
+                AutoUpdate = Convert.ToBoolean(iniFile.IniReadValue("General", "AutoUpdate"));
                 //Account
                 Region = iniFile.IniReadValue("Account", "Region").ToUpper();
                 buyBoost = Convert.ToBoolean(iniFile.IniReadValue("Account", "BuyBoost"));
