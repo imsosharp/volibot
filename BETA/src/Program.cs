@@ -56,6 +56,16 @@ namespace RitoBot
                 Console.WriteLine(getTimestamp() + "Replacing Config");
                 gamecfg();
             }
+            while (!File.Exists(Path2 + "lol.launcher.exe"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine();
+                Console.WriteLine("Wrong LauncherPath. the path should look like this: C:\\Riot Games\\League of Legends\\ \n Please check config\\settings.ini, otherwise your LoL won't start.");
+                Console.WriteLine();
+                System.Threading.Thread.Sleep(5000);
+                loadConfiguration();
+            }
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(getTimestamp() + "Loading config\\accounts.txt");
             loadAccounts();
             int curRunning = 0;
@@ -85,6 +95,7 @@ namespace RitoBot
                 catch (Exception)
                 {
                     Console.WriteLine("CountAccError: You may have an issue in your accounts.txt");
+                    Application.Exit();
                 }
             }
             Console.ReadKey();
@@ -140,12 +151,6 @@ namespace RitoBot
                 //Account
                 Region = iniFile.IniReadValue("Account", "Region").ToUpper();
                 buyBoost = Convert.ToBoolean(iniFile.IniReadValue("Account", "BuyBoost"));
-
-                if (Path2.ToLower().Contains("lol.launcher"))
-                {
-                    Console.Write("wrong path! the path should look like this: C:\\Riot Games\\League of Legends\\");
-                    Application.Exit();
-                }
             }
             catch (Exception e)
             {
