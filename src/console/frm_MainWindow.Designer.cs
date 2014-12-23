@@ -1,4 +1,4 @@
-﻿namespace RitoBot
+namespace RitoBot
 {
     partial class frm_MainWindow
     {
@@ -129,9 +129,9 @@
             this.LoadedAccounts.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.LoadedAccounts.Location = new System.Drawing.Point(0, 185);
+            this.LoadedAccounts.Location = new System.Drawing.Point(0, 202);
             this.LoadedAccounts.Name = "LoadedAccounts";
-            this.LoadedAccounts.Size = new System.Drawing.Size(337, 262);
+            this.LoadedAccounts.Size = new System.Drawing.Size(337, 245);
             this.LoadedAccounts.TabIndex = 3;
             this.LoadedAccounts.Text = "";
             // 
@@ -148,7 +148,7 @@
             // 
             this.accountsLabel.AutoSize = true;
             this.accountsLabel.ForeColor = System.Drawing.Color.Black;
-            this.accountsLabel.Location = new System.Drawing.Point(3, 169);
+            this.accountsLabel.Location = new System.Drawing.Point(4, 186);
             this.accountsLabel.Name = "accountsLabel";
             this.accountsLabel.Size = new System.Drawing.Size(52, 13);
             this.accountsLabel.TabIndex = 2;
@@ -196,7 +196,7 @@
             // 
             // addAccountsBtn
             // 
-            this.addAccountsBtn.Location = new System.Drawing.Point(3, 143);
+            this.addAccountsBtn.Location = new System.Drawing.Point(0, 160);
             this.addAccountsBtn.Name = "addAccountsBtn";
             this.addAccountsBtn.Size = new System.Drawing.Size(326, 23);
             this.addAccountsBtn.TabIndex = 4;
@@ -265,7 +265,7 @@
             this.settingsTab.Location = new System.Drawing.Point(4, 22);
             this.settingsTab.Name = "settingsTab";
             this.settingsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.settingsTab.Size = new System.Drawing.Size(332, 448);
+            this.settingsTab.Size = new System.Drawing.Size(337, 450);
             this.settingsTab.TabIndex = 1;
             this.settingsTab.Text = "Settings";
             this.settingsTab.UseVisualStyleBackColor = true;
@@ -275,7 +275,7 @@
             this.MaxLevelInput.Dock = System.Windows.Forms.DockStyle.Top;
             this.MaxLevelInput.Location = new System.Drawing.Point(3, 286);
             this.MaxLevelInput.Name = "MaxLevelInput";
-            this.MaxLevelInput.Size = new System.Drawing.Size(326, 20);
+            this.MaxLevelInput.Size = new System.Drawing.Size(331, 20);
             this.MaxLevelInput.TabIndex = 21;
             // 
             // maxLevelLabel
@@ -293,7 +293,7 @@
             this.MaxBotsInput.Dock = System.Windows.Forms.DockStyle.Top;
             this.MaxBotsInput.Location = new System.Drawing.Point(3, 253);
             this.MaxBotsInput.Name = "MaxBotsInput";
-            this.MaxBotsInput.Size = new System.Drawing.Size(326, 20);
+            this.MaxBotsInput.Size = new System.Drawing.Size(331, 20);
             this.MaxBotsInput.TabIndex = 19;
             // 
             // maxBotsLabel
@@ -315,7 +315,7 @@
             "NO"});
             this.DefaultQueueInput.Location = new System.Drawing.Point(3, 219);
             this.DefaultQueueInput.Name = "DefaultQueueInput";
-            this.DefaultQueueInput.Size = new System.Drawing.Size(326, 21);
+            this.DefaultQueueInput.Size = new System.Drawing.Size(331, 21);
             this.DefaultQueueInput.TabIndex = 17;
             // 
             // defaultQueueLabel
@@ -337,7 +337,7 @@
             "NO"});
             this.DefaultChampionInput.Location = new System.Drawing.Point(3, 185);
             this.DefaultChampionInput.Name = "DefaultChampionInput";
-            this.DefaultChampionInput.Size = new System.Drawing.Size(326, 21);
+            this.DefaultChampionInput.Size = new System.Drawing.Size(331, 21);
             this.DefaultChampionInput.TabIndex = 15;
             // 
             // defaultChampionLabel
@@ -356,7 +356,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.replaceConfigBtn.Location = new System.Drawing.Point(3, 341);
             this.replaceConfigBtn.Name = "replaceConfigBtn";
-            this.replaceConfigBtn.Size = new System.Drawing.Size(326, 23);
+            this.replaceConfigBtn.Size = new System.Drawing.Size(331, 23);
             this.replaceConfigBtn.TabIndex = 13;
             this.replaceConfigBtn.Text = "REPLACE GAME CONFIG";
             this.replaceConfigBtn.UseVisualStyleBackColor = true;
@@ -368,7 +368,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.saveBtn.Location = new System.Drawing.Point(3, 312);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(326, 23);
+            this.saveBtn.Size = new System.Drawing.Size(331, 23);
             this.saveBtn.TabIndex = 12;
             this.saveBtn.Text = "SAVE";
             this.saveBtn.UseVisualStyleBackColor = true;
@@ -383,7 +383,7 @@
             "NO"});
             this.BuyBoostInput.Location = new System.Drawing.Point(3, 151);
             this.BuyBoostInput.Name = "BuyBoostInput";
-            this.BuyBoostInput.Size = new System.Drawing.Size(326, 21);
+            this.BuyBoostInput.Size = new System.Drawing.Size(331, 21);
             this.BuyBoostInput.TabIndex = 11;
             // 
             // BuyBoostLabel
@@ -413,7 +413,7 @@
             "QQ"});
             this.Spell2Input.Location = new System.Drawing.Point(3, 117);
             this.Spell2Input.Name = "Spell2Input";
-            this.Spell2Input.Size = new System.Drawing.Size(326, 21);
+            this.Spell2Input.Size = new System.Drawing.Size(331, 21);
             this.Spell2Input.TabIndex = 9;
             // 
             // spell2Label
@@ -443,7 +443,7 @@
             "QQ"});
             this.Spell1Input.Location = new System.Drawing.Point(3, 83);
             this.Spell1Input.Name = "Spell1Input";
-            this.Spell1Input.Size = new System.Drawing.Size(326, 21);
+            this.Spell1Input.Size = new System.Drawing.Size(331, 21);
             this.Spell1Input.TabIndex = 7;
             // 
             // spell1Label
@@ -473,7 +473,7 @@
             "QQ"});
             this.RegionInput.Location = new System.Drawing.Point(3, 49);
             this.RegionInput.Name = "RegionInput";
-            this.RegionInput.Size = new System.Drawing.Size(326, 21);
+            this.RegionInput.Size = new System.Drawing.Size(331, 21);
             this.RegionInput.TabIndex = 5;
             // 
             // regionLabel
@@ -491,7 +491,7 @@
             this.LauncherPathInput.Dock = System.Windows.Forms.DockStyle.Top;
             this.LauncherPathInput.Location = new System.Drawing.Point(3, 16);
             this.LauncherPathInput.Name = "LauncherPathInput";
-            this.LauncherPathInput.Size = new System.Drawing.Size(326, 20);
+            this.LauncherPathInput.Size = new System.Drawing.Size(331, 20);
             this.LauncherPathInput.TabIndex = 3;
             // 
             // launcherPathLabel
@@ -526,6 +526,8 @@
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(1040, 476);
             this.Controls.Add(this.mainWindowSplitContainer);
+            this.DoubleBuffered = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frm_MainWindow";
             this.Text = "RitoBot GUI";
