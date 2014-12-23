@@ -1,18 +1,22 @@
-﻿#region
-
-using System;
-using LoLLauncher.RiotObjects.Platform.Catalog.Champion;
-
-#endregion
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace LoLLauncher.RiotObjects.Platform.Messaging
 {
-    internal class StoreFulfillmentNotification : RiotGamesObject
+    class StoreFulfillmentNotification : RiotGamesObject
     {
-        public delegate void Callback(StoreFulfillmentNotification result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.reroll.pojo.StoreFulfillmentNotification";
+        private string type = "com.riotgames.platform.reroll.pojo.StoreFulfillmentNotification";
 
         public StoreFulfillmentNotification()
         {
@@ -20,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Messaging
 
         public StoreFulfillmentNotification(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public StoreFulfillmentNotification(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(StoreFulfillmentNotification result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("rp")]
@@ -43,12 +52,7 @@ namespace LoLLauncher.RiotObjects.Platform.Messaging
         public String InventoryType { get; set; }
 
         [InternalName("data")]
-        public ChampionDto Data { get; set; }
+        public Platform.Catalog.Champion.ChampionDTO Data { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

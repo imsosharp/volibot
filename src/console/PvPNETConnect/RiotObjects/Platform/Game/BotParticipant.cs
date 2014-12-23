@@ -1,18 +1,23 @@
-#region
-
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using LoLLauncher.RiotObjects.Platform.Catalog.Champion;
-
-#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Game
 {
+
     public class BotParticipant : Participant
     {
-        public delegate void Callback(BotParticipant result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.game.BotParticipant";
+        private string type = "com.riotgames.platform.game.BotParticipant";
 
         public BotParticipant()
         {
@@ -20,24 +25,29 @@ namespace LoLLauncher.RiotObjects.Platform.Game
 
         public BotParticipant(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public BotParticipant(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(BotParticipant result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("botSkillLevel")]
         public Int32 BotSkillLevel { get; set; }
 
         [InternalName("champion")]
-        public ChampionDto Champion { get; set; }
+        public ChampionDTO Champion { get; set; }
 
         [InternalName("botSkillLevelName")]
         public String BotSkillLevelName { get; set; }
@@ -72,10 +82,5 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         [InternalName("teamName")]
         public object TeamName { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

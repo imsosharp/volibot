@@ -1,17 +1,15 @@
-﻿#region
-
-using System;
-
-#endregion
+﻿using System;
 
 namespace LoLLauncher.RiotObjects.Platform.Catalog.Icon
 {
     public class Icon : RiotGamesObject
     {
-        public delegate void Callback(Icon result);
+        public override string TypeName
+        {
+            get { return this.type; }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.catalog.icon.Icon";
+        private string type = "com.riotgames.platform.catalog.icon.Icon";
 
         public Icon()
         {
@@ -19,17 +17,22 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Icon
 
         public Icon(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public Icon(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(Icon result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("purchaseDate")]
@@ -40,11 +43,5 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Icon
 
         [InternalName("summonerId")]
         public Double SummonerId { get; set; }
-
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

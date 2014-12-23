@@ -1,18 +1,16 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-
-#endregion
+using System.Threading;
 
 namespace LoLLauncher.Assets
 {
     public static class AsyncHelpers
     {
         /// <summary>
-        ///     Execute's an async Task<T> method which has a void return value synchronously
+        /// Execute's an async Task<T> method which has a void return value synchronously
         /// </summary>
         /// <param name="task">Task<T> method to execute</param>
         public static void RunSync(Func<Task> task)
@@ -42,7 +40,7 @@ namespace LoLLauncher.Assets
         }
 
         /// <summary>
-        ///     Execute's an async Task<T> method which has a T return type synchronously
+        /// Execute's an async Task<T> method which has a T return type synchronously
         /// </summary>
         /// <typeparam name="T">Return Type</typeparam>
         /// <param name="task">Task<T> method to execute</param>
@@ -52,7 +50,7 @@ namespace LoLLauncher.Assets
             var oldContext = SynchronizationContext.Current;
             var synch = new ExclusiveSynchronizationContext();
             SynchronizationContext.SetSynchronizationContext(synch);
-            var ret = default(T);
+            T ret = default(T);
             synch.Post(async _ =>
             {
                 try
@@ -76,13 +74,11 @@ namespace LoLLauncher.Assets
 
         private class ExclusiveSynchronizationContext : SynchronizationContext
         {
-            private bool _done;
-
-            private readonly Queue<Tuple<SendOrPostCallback, object>> _items =
-                new Queue<Tuple<SendOrPostCallback, object>>();
-
-            private readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
+            private bool done;
             public Exception InnerException { get; set; }
+            readonly AutoResetEvent workItemsWaiting = new AutoResetEvent(false);
+            readonly Queue<Tuple<SendOrPostCallback, object>> items =
+                new Queue<Tuple<SendOrPostCallback, object>>();
 
             public override void Send(SendOrPostCallback d, object state)
             {
@@ -91,25 +87,26 @@ namespace LoLLauncher.Assets
 
             public override void Post(SendOrPostCallback d, object state)
             {
-                lock (_items)
+                lock (items)
                 {
-                    _items.Enqueue(Tuple.Create(d, state));
+                    items.Enqueue(Tuple.Create(d, state));
                 }
-                _workItemsWaiting.Set();
+                workItemsWaiting.Set();
             }
 
             public void EndMessageLoop()
             {
-                Post(_ => _done = true, null);
+                Post(_ => done = true, null);
             }
 
             public void BeginMessageLoop()
             {
-                while (!_done)
+                while (!done)
                 {
                     Tuple<SendOrPostCallback, object> task = null;
                 }
             }
         }
     }
+        
 }

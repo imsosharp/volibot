@@ -1,18 +1,22 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Matchmaking
 {
+
     public class MatchingThrottleConfig : RiotGamesObject
     {
-        public delegate void Callback(MatchingThrottleConfig result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.matchmaking.MatchingThrottleConfig";
+        private string type = "com.riotgames.platform.matchmaking.MatchingThrottleConfig";
 
         public MatchingThrottleConfig()
         {
@@ -20,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Matchmaking
 
         public MatchingThrottleConfig(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public MatchingThrottleConfig(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(MatchingThrottleConfig result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("limit")]
@@ -42,10 +51,5 @@ namespace LoLLauncher.RiotObjects.Platform.Matchmaking
         [InternalName("cacheName")]
         public String CacheName { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

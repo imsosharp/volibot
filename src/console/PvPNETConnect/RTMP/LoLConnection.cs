@@ -1,8 +1,7 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -10,125 +9,79 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
+using System.Threading.Tasks;
+
 using LoLLauncher.RiotObjects;
 using LoLLauncher.RiotObjects.Platform.Game;
 using LoLLauncher.RiotObjects.Platform.Game.Message;
-using LoLLauncher.RiotObjects.Platform.Login;
 using LoLLauncher.RiotObjects.Platform.Matchmaking;
 using LoLLauncher.RiotObjects.Platform.Messaging;
-using RitoBot;
-
-#endregion
 
 namespace LoLLauncher
 {
     public partial class LoLConnection
     {
-        #region Disconnect Methods
-
-        public void Disconnect()
-        {
-            var t = new Thread(() =>
-            {
-                if (_isConnected)
-                {
-                    var id = Invoke("loginService", "logout", new object[] {_authToken});
-                    Join(id);
-                }
-
-                _isConnected = false;
-
-                if (HeartbeatThread != null)
-                    HeartbeatThread.Abort();
-
-                if (DecodeThread != null)
-                    DecodeThread.Abort();
-
-                _invokeId = 2;
-                _heartbeatCount = 1;
-                _pendingInvokes.Clear();
-                _callbacks.Clear();
-                _results.Clear();
-
-                _client = null;
-                _sslStream = null;
-
-                if (OnDisconnect != null)
-                    OnDisconnect(this, EventArgs.Empty);
-            });
-
-            t.Start();
-        }
-
-        #endregion
-
         #region Member Declarations
 
         //RTMPS Connection Info
-        private bool _isConnected;
-        private bool _isLoggedIn;
-        private TcpClient _client;
-        private SslStream _sslStream;
-        private string _ipAddress;
-        private string _authToken;
-        private int _accountId;
-        private string _sessionToken;
-        private string _dsId;
+        private bool isConnected = false;
+        private bool isLoggedIn = false;
+        private TcpClient client;
+        private SslStream sslStream;
+        private string ipAddress;
+        private string authToken;
+        private int accountID;
+        private string sessionToken;
+        private string DSId;
 
         //Initial Login Information
-        private string _user;
-        private string _password;
-        private string _server;
-        private string _loginQueue;
-        private string _locale;
-        private string _clientVersion;
+        private string user;
+        private string password;
+        private string server;
+        private string loginQueue;
+        private string locale;
+        private string clientVersion;
 
         /** Garena information */
-        private bool _useGarena;
-        private string _garenaToken;
-        private string _userId;
+        private bool useGarena = false;
+        private string garenaToken;
+        private string userID;
 
         //Invoke Variables
-        private readonly Random _rand = new Random();
-        private readonly JavaScriptSerializer _serializer = new JavaScriptSerializer();
+        private Random rand = new Random();
+        private JavaScriptSerializer serializer = new JavaScriptSerializer();
 
-        private int _invokeId = 2;
+        private int invokeID = 2;
 
-        private readonly List<int> _pendingInvokes = new List<int>();
-        private readonly Dictionary<int, TypedObject> _results = new Dictionary<int, TypedObject>();
-        private readonly Dictionary<int, RiotGamesObject> _callbacks = new Dictionary<int, RiotGamesObject>();
-        public Thread DecodeThread;
+        private List<int> pendingInvokes = new List<int>();
+        private Dictionary<int, TypedObject> results = new Dictionary<int, TypedObject>();
+        private Dictionary<int, RiotGamesObject> callbacks = new Dictionary<int, RiotGamesObject>();
+        public Thread decodeThread;
 
-        private int _heartbeatCount = 1;
-        public Thread HeartbeatThread;
-        private readonly Object _isInvokingLock = new Object();
+        private int heartbeatCount = 1;
+        public Thread heartbeatThread;
+        private Object isInvokingLock = new Object();
 
         #endregion
 
         #region Event Handlers
 
         public delegate void OnConnectHandler(object sender, EventArgs e);
-
         public event OnConnectHandler OnConnect;
 
         public delegate void OnLoginQueueUpdateHandler(object sender, int positionInLine);
-
         public event OnLoginQueueUpdateHandler OnLoginQueueUpdate;
 
         public delegate void OnLoginHandler(object sender, string username, string ipAddress);
-
         public event OnLoginHandler OnLogin;
 
         public delegate void OnDisconnectHandler(object sender, EventArgs e);
-
         public event OnDisconnectHandler OnDisconnect;
 
         public delegate void OnMessageReceivedHandler(object sender, object message);
-
         public event OnMessageReceivedHandler OnMessageReceived;
 
         public delegate void OnErrorHandler(object sender, Error error);
-
         public event OnErrorHandler OnError;
 
         #endregion
@@ -137,23 +90,23 @@ namespace LoLLauncher
 
         public void Connect(string user, string password, Region region, string clientVersion)
         {
-            if (!_isConnected)
+            if (!isConnected)
             {
-                var t = new Thread(() =>
+                Thread t = new Thread(() =>
                 {
-                    this._user = user;
-                    this._password = password;
-                    this._clientVersion = clientVersion;
+                    this.user = user;
+                    this.password = password;
+                    this.clientVersion = clientVersion;
                     //this.server = "127.0.0.1";
-                    _server = RegionInfo.GetServerValue(region);
-                    _loginQueue = RegionInfo.GetLoginQueueValue(region);
-                    _locale = RegionInfo.GetLocaleValue(region);
-                    _useGarena = RegionInfo.GetUseGarenaValue(region);
+                    this.server = RegionInfo.GetServerValue(region);
+                    this.loginQueue = RegionInfo.GetLoginQueueValue(region);
+                    this.locale = RegionInfo.GetLocaleValue(region);
+                    this.useGarena = RegionInfo.GetUseGarenaValue(region);
 
                     //Sets up our sslStream to riots servers
                     try
                     {
-                        _client = new TcpClient(_server, 2099);
+                        client = new TcpClient(server, 2099);
                     }
                     catch
                     {
@@ -164,7 +117,7 @@ namespace LoLLauncher
 
                     //Check for riot webserver status
                     //along with gettin out Auth Key that we need for the login process.
-                    if (_useGarena)
+                    if (useGarena)
                         if (!GetGarenaToken())
                             return;
 
@@ -174,13 +127,13 @@ namespace LoLLauncher
                     if (!GetIpAddress())
                         return;
 
-                    _sslStream = new SslStream(_client.GetStream(), false, AcceptAllCertificates);
-                    var ar = _sslStream.BeginAuthenticateAsClient(_server, null, null);
+                    sslStream = new SslStream(client.GetStream(), false, AcceptAllCertificates);
+                    var ar = sslStream.BeginAuthenticateAsClient(server, null, null);
                     using (ar.AsyncWaitHandle)
                     {
                         if (ar.AsyncWaitHandle.WaitOne(-1))
                         {
-                            _sslStream.EndAuthenticateAsClient(ar);
+                            sslStream.EndAuthenticateAsClient(ar);
                         }
                     }
 
@@ -201,8 +154,7 @@ namespace LoLLauncher
             }
         }
 
-        private bool AcceptAllCertificates(object sender, X509Certificate certificate, X509Chain chain,
-            SslPolicyErrors sslPolicyErrors)
+        private bool AcceptAllCertificates(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             return true;
         }
@@ -303,52 +255,52 @@ namespace LoLLauncher
         {
             try
             {
-                var sb = new StringBuilder();
-                var payload = "user=" + _user + ",password=" + _password;
-                var query = "payload=" + payload;
+                StringBuilder sb = new StringBuilder();
+                string payload = "user=" + user + ",password=" + password;
+                string query = "payload=" + payload;
 
-                if (_useGarena)
-                    payload = _garenaToken;
+                if (useGarena)
+                    payload = garenaToken;
 
-                var con = WebRequest.Create(_loginQueue + "login-queue/rest/queue/authenticate");
+                WebRequest con = WebRequest.Create(loginQueue + "login-queue/rest/queue/authenticate");
                 con.Method = "POST";
 
-                var outputStream = con.GetRequestStream();
+                Stream outputStream = con.GetRequestStream();
                 outputStream.Write(Encoding.ASCII.GetBytes(query), 0, Encoding.ASCII.GetByteCount(query));
 
-                var webresponse = con.GetResponse();
-                var inputStream = webresponse.GetResponseStream();
+                WebResponse webresponse = con.GetResponse();
+                Stream inputStream = webresponse.GetResponseStream();
 
                 int c;
                 while ((c = inputStream.ReadByte()) != -1)
-                    sb.Append((char) c);
+                    sb.Append((char)c);
 
-                var result = _serializer.Deserialize<TypedObject>(sb.ToString());
+                TypedObject result = serializer.Deserialize<TypedObject>(sb.ToString());
                 outputStream.Close();
                 inputStream.Close();
                 con.Abort();
 
                 if (!result.ContainsKey("token"))
                 {
-                    var node = (int) result.GetInt("node");
-                    var champ = result.GetString("champ");
-                    var rate = (int) result.GetInt("rate");
-                    var delay = (int) result.GetInt("delay");
+                    int node = (int)result.GetInt("node");
+                    string champ = result.GetString("champ");
+                    int rate = (int)result.GetInt("rate");
+                    int delay = (int)result.GetInt("delay");
 
-                    var id = 0;
-                    var cur = 0;
+                    int id = 0;
+                    int cur = 0;
 
-                    var tickers = result.GetArray("tickers");
-                    foreach (var o in tickers)
+                    object[] tickers = result.GetArray("tickers");
+                    foreach (object o in tickers)
                     {
-                        var to = (Dictionary<string, object>) o;
+                        Dictionary<string, object> to = (Dictionary<string, object>)o;
 
-                        var tnode = (int) to["node"];
+                        int tnode = (int)to["node"];
                         if (tnode != node)
                             continue;
 
-                        id = (int) to["id"];
-                        cur = (int) to["current"];
+                        id = (int)to["id"];
+                        cur = (int)to["current"];
                         break;
                     }
 
@@ -359,16 +311,16 @@ namespace LoLLauncher
                             OnLoginQueueUpdate(this, id - cur);
 
                         Thread.Sleep(delay);
-                        con = WebRequest.Create(_loginQueue + "login-queue/rest/queue/ticker/" + champ);
+                        con = WebRequest.Create(loginQueue + "login-queue/rest/queue/ticker/" + champ);
                         con.Method = "GET";
                         webresponse = con.GetResponse();
                         inputStream = webresponse.GetResponseStream();
 
                         int d;
                         while ((d = inputStream.ReadByte()) != -1)
-                            sb.Append((char) d);
+                            sb.Append((char)d);
 
-                        result = _serializer.Deserialize<TypedObject>(sb.ToString());
+                        result = serializer.Deserialize<TypedObject>(sb.ToString());
 
 
                         inputStream.Close();
@@ -381,6 +333,7 @@ namespace LoLLauncher
                     }
 
 
+
                     while (sb.ToString() == null || !result.ContainsKey("token"))
                     {
                         try
@@ -390,38 +343,40 @@ namespace LoLLauncher
                             if (id - cur < 0)
                                 if (OnLoginQueueUpdate != null)
                                     OnLoginQueueUpdate(this, 0);
-                                else if (OnLoginQueueUpdate != null)
-                                    OnLoginQueueUpdate(this, id - cur);
+                                else
+                                    if (OnLoginQueueUpdate != null)
+                                        OnLoginQueueUpdate(this, id - cur);
 
-                            Thread.Sleep(delay/10);
-                            con = WebRequest.Create(_loginQueue + "login-queue/rest/queue/authToken/" + _user.ToLower());
+                            Thread.Sleep(delay / 10);
+                            con = WebRequest.Create(loginQueue + "login-queue/rest/queue/authToken/" + user.ToLower());
                             con.Method = "GET";
                             webresponse = con.GetResponse();
                             inputStream = webresponse.GetResponseStream();
 
                             int f;
                             while ((f = inputStream.ReadByte()) != -1)
-                                sb.Append((char) f);
+                                sb.Append((char)f);
 
-                            result = _serializer.Deserialize<TypedObject>(sb.ToString());
+                            result = serializer.Deserialize<TypedObject>(sb.ToString());
 
                             inputStream.Close();
                             con.Abort();
                         }
                         catch
                         {
+
                         }
                     }
                 }
                 if (OnLoginQueueUpdate != null)
                     OnLoginQueueUpdate(this, 0);
-                _authToken = result.GetString("token");
+                authToken = result.GetString("token");
 
                 return true;
             }
             catch (Exception e)
             {
-                if (e.Message == "The remote name could not be resolved: '" + _loginQueue + "'")
+                if (e.Message == "The remote name could not be resolved: '" + loginQueue + "'")
                 {
                     Error("Please make sure you are connected the internet!", ErrorType.AuthKey);
                     Disconnect();
@@ -443,14 +398,14 @@ namespace LoLLauncher
 
         private int HexToInt(string hex)
         {
-            var total = 0;
-            for (var i = 0; i < hex.Length; i++)
+            int total = 0;
+            for (int i = 0; i < hex.Length; i++)
             {
-                var c = hex.ToCharArray()[i];
+                char c = hex.ToCharArray()[i];
                 if (c >= '0' && c <= '9')
-                    total = total*16 + c - '0';
+                    total = total * 16 + c - '0';
                 else
-                    total = total*16 + c - 'a' + 10;
+                    total = total * 16 + c - 'a' + 10;
             }
 
             return total;
@@ -460,20 +415,20 @@ namespace LoLLauncher
         {
             try
             {
-                var sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
 
-                var con = WebRequest.Create("http://ll.leagueoflegends.com/services/connection_info");
-                var response = con.GetResponse();
+                WebRequest con = WebRequest.Create("http://ll.leagueoflegends.com/services/connection_info");
+                WebResponse response = con.GetResponse();
 
                 int c;
                 while ((c = response.GetResponseStream().ReadByte()) != -1)
-                    sb.Append((char) c);
+                    sb.Append((char)c);
 
                 con.Abort();
 
-                var result = _serializer.Deserialize<TypedObject>(sb.ToString());
+                TypedObject result = serializer.Deserialize<TypedObject>(sb.ToString());
 
-                _ipAddress = result.GetString("ip_address");
+                ipAddress = result.GetString("ip_address");
 
                 return true;
             }
@@ -487,33 +442,33 @@ namespace LoLLauncher
 
         private bool Handshake()
         {
-            var handshakePacket = new byte[1537];
-            _rand.NextBytes(handshakePacket);
-            handshakePacket[0] = 0x03;
-            _sslStream.Write(handshakePacket);
+            byte[] handshakePacket = new byte[1537];
+            rand.NextBytes(handshakePacket);
+            handshakePacket[0] = (byte)0x03;
+            sslStream.Write(handshakePacket);
 
-            var s0 = (byte) _sslStream.ReadByte();
-            if (s0 != 0x03)
+            byte S0 = (byte)sslStream.ReadByte();
+            if (S0 != 0x03)
             {
-                Error("Server returned incorrect version in handshake: " + s0, ErrorType.Handshake);
+                Error("Server returned incorrect version in handshake: " + S0, ErrorType.Handshake);
                 Disconnect();
                 return false;
             }
 
 
-            var responsePacket = new byte[1536];
-            _sslStream.Read(responsePacket, 0, 1536);
-            _sslStream.Write(responsePacket);
+            byte[] responsePacket = new byte[1536];
+            sslStream.Read(responsePacket, 0, 1536);
+            sslStream.Write(responsePacket);
 
             // Wait for response and discard result
-            var s2 = new byte[1536];
-            _sslStream.Read(s2, 0, 1536);
+            byte[] S2 = new byte[1536];
+            sslStream.Read(S2, 0, 1536);
 
             // Validate handshake
-            var valid = true;
-            for (var i = 8; i < 1536; i++)
+            bool valid = true;
+            for (int i = 8; i < 1536; i++)
             {
-                if (handshakePacket[i + 1] != s2[i])
+                if (handshakePacket[i + 1] != S2[i])
                 {
                     valid = false;
                     break;
@@ -531,11 +486,11 @@ namespace LoLLauncher
 
         private bool SendConnect()
         {
-            var paramaters = new Dictionary<string, object>();
+            Dictionary<string, object> paramaters = new Dictionary<string, object>();
             paramaters.Add("app", "");
             paramaters.Add("flashVer", "WIN 10,6,602,161");
             paramaters.Add("swfUrl", "app:/LolClient.swf/[[DYNAMIC]]/32");
-            paramaters.Add("tcUrl", "rtmps://" + _server + ":" + 2099);
+            paramaters.Add("tcUrl", "rtmps://" + server + ":" + 2099);
             paramaters.Add("fpad", false);
             paramaters.Add("capabilities", 239);
             paramaters.Add("audioCodecs", 3575);
@@ -544,15 +499,15 @@ namespace LoLLauncher
             paramaters.Add("pageUrl", null);
             paramaters.Add("objectEncoding", 3);
 
-            var encoder = new RtmpsEncoder();
-            var connect = encoder.EncodeConnect(paramaters);
+            RTMPSEncoder encoder = new RTMPSEncoder();
+            byte[] connect = encoder.EncodeConnect(paramaters);
 
-            _sslStream.Write(connect, 0, connect.Length);
+            sslStream.Write(connect, 0, connect.Length);
 
-            while (!_results.ContainsKey(1))
+            while (!results.ContainsKey(1))
                 Thread.Sleep(10);
-            var result = _results[1];
-            _results.Remove(1);
+            TypedObject result = results[1];
+            results.Remove(1);
             if (result["result"].Equals("_error"))
             {
                 Error(GetErrorMessage(result), ErrorType.Connect);
@@ -560,9 +515,9 @@ namespace LoLLauncher
                 return false;
             }
 
-            _dsId = result.GetTO("data").GetString("id");
+            DSId = result.GetTO("data").GetString("id");
 
-            _isConnected = true;
+            isConnected = true;
             if (OnConnect != null)
                 OnConnect(this, EventArgs.Empty);
 
@@ -574,36 +529,35 @@ namespace LoLLauncher
             TypedObject result, body;
 
             // Login 1
-            var cred = new AuthenticationCredentials();
-            cred.Password = _password;
-            cred.ClientVersion = _clientVersion;
-            cred.IpAddress = _ipAddress;
+            RiotObjects.Platform.Login.AuthenticationCredentials cred = new RiotObjects.Platform.Login.AuthenticationCredentials();
+            cred.Password = password;
+            cred.ClientVersion = clientVersion;
+            cred.IpAddress = ipAddress;
             cred.SecurityAnswer = null;
-            cred.Locale = _locale;
+            cred.Locale = locale;
             cred.Domain = "lolclient.lol.riotgames.com";
             cred.OldPassword = null;
-            cred.AuthToken = _authToken;
+            cred.AuthToken = authToken;
 
-            if (_useGarena)
+            if (useGarena)
             {
-                cred.PartnerCredentials = "8393 " + _garenaToken;
-                cred.Username = _userId;
+                cred.PartnerCredentials = "8393 " + garenaToken;
+                cred.Username = userID;
             }
             else
             {
                 cred.PartnerCredentials = null;
-                cred.Username = _user;
+                cred.Username = user;
             }
-            var id = Invoke("loginService", "login", new object[] {cred.GetBaseTypedObject()});
+            int id = Invoke("loginService", "login", new object[] { cred.GetBaseTypedObject() });
 
             result = GetResult(id);
             if (result["result"].Equals("_error"))
             {
-                if (Program.AutoUpdate)
+                if (RitoBot.Program.AutoUpdate)
                 {
-                    var newVersion =
-                        (string) result.GetTO("data").GetTO("rootCause").GetArray("substitutionArguments")[1];
-                    if (newVersion != Program.Cversion)
+                    string newVersion = (string)result.GetTO("data").GetTO("rootCause").GetArray("substitutionArguments")[1];
+                    if (newVersion != RitoBot.Program.cversion)
                     {
                         if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "config\\version.txt"))
                         {
@@ -614,7 +568,7 @@ namespace LoLLauncher
                     }
                     Error("Volibot updated for version " + newVersion + ". Please restart.", ErrorType.General);
                 }
-                else
+                else 
                 {
                     Error(GetErrorMessage(result), ErrorType.Login);
                 }
@@ -623,25 +577,24 @@ namespace LoLLauncher
             }
 
             body = result.GetTO("data").GetTO("body");
-            _sessionToken = body.GetString("token");
-            _accountId = (int) body.GetTO("accountSummary").GetInt("accountId");
+            sessionToken = body.GetString("token");
+            accountID = (int)body.GetTO("accountSummary").GetInt("accountId");
 
             // Login 2
 
-            if (_useGarena)
-                body = WrapBody(Convert.ToBase64String(Encoding.UTF8.GetBytes(_userId + ":" + _sessionToken)), "auth", 8);
+            if (useGarena)
+                body = WrapBody(Convert.ToBase64String(Encoding.UTF8.GetBytes(userID + ":" + sessionToken)), "auth", 8);
             else
-                body = WrapBody(Convert.ToBase64String(Encoding.UTF8.GetBytes(_user.ToLower() + ":" + _sessionToken)),
-                    "auth", 8);
+                body = WrapBody(Convert.ToBase64String(Encoding.UTF8.GetBytes(user.ToLower() + ":" + sessionToken)), "auth", 8);
 
-            body.Type = "flex.messaging.messages.CommandMessage";
+            body.type = "flex.messaging.messages.CommandMessage";
 
             id = Invoke(body);
             result = GetResult(id); // Read result and discard
 
-            _isLoggedIn = true;
+            isLoggedIn = true;
             if (OnLogin != null)
-                OnLogin(this, _user, _ipAddress);
+                OnLogin(this, user, ipAddress);
             return true;
         }
 
@@ -659,41 +612,74 @@ namespace LoLLauncher
 
         private void StartHeartbeat()
         {
-            HeartbeatThread = new Thread(async () =>
+            heartbeatThread = new Thread(async () =>
             {
                 while (true)
                 {
                     try
                     {
-                        var hbTime = (long) DateTime.Now.TimeOfDay.TotalMilliseconds;
-                        var result =
-                            await
-                                PerformLcdsHeartBeat(_accountId, _sessionToken, _heartbeatCount,
-                                    DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMT-0700'"));
+                        long hbTime = (long)DateTime.Now.TimeOfDay.TotalMilliseconds;
+                        string result = await PerformLCDSHeartBeat(accountID, sessionToken, heartbeatCount, DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMT-0700'"));
                         //int id = Invoke("loginService", "performLCDSHeartBeat", new object[] { accountID, sessionToken, heartbeatCount, DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMT-0700'") });
                         //Cancel(id); // Ignore result for now
 
-                        _heartbeatCount++;
+                        heartbeatCount++;
 
                         // Quick sleeps to shutdown the heartbeat quickly on a reconnect
-                        while ((long) DateTime.Now.TimeOfDay.TotalMilliseconds - hbTime < 120000)
+                        while ((long)DateTime.Now.TimeOfDay.TotalMilliseconds - hbTime < 120000)
                             Thread.Sleep(100);
                     }
                     catch
                     {
+
                     }
                 }
             });
-            HeartbeatThread.Start();
+            heartbeatThread.Start();
         }
+        #endregion
 
+        #region Disconnect Methods
+
+        public void Disconnect()
+        {
+            Thread t = new Thread(() =>
+            {
+                if (isConnected)
+                {
+                    int id = Invoke("loginService", "logout", new object[] { authToken });
+                    Join(id);
+                }
+
+                isConnected = false;
+
+                if (heartbeatThread != null)
+                    heartbeatThread.Abort();
+
+                if (decodeThread != null)
+                    decodeThread.Abort();
+
+                invokeID = 2;
+                heartbeatCount = 1;
+                pendingInvokes.Clear();
+                callbacks.Clear();
+                results.Clear();
+
+                client = null;
+                sslStream = null;
+
+                if (OnDisconnect != null)
+                    OnDisconnect(this, EventArgs.Empty);
+            });
+
+            t.Start();
+        }
         #endregion
 
         #region Error Methods
-
         private void Error(string message, string errorCode, ErrorType type)
         {
-            var error = new Error
+            Error error = new Error()
             {
                 Type = type,
                 Message = message,
@@ -703,36 +689,34 @@ namespace LoLLauncher
             if (OnError != null)
                 OnError(this, error);
         }
-
         private void Error(string message, ErrorType type)
         {
             Error(message, "", type);
         }
-
         #endregion
 
         #region Send Methods
 
         private int Invoke(TypedObject packet)
         {
-            lock (_isInvokingLock)
+            lock (isInvokingLock)
             {
-                var id = NextInvokeId();
-                _pendingInvokes.Add(id);
+                int id = NextInvokeID();
+                pendingInvokes.Add(id);
 
                 try
                 {
-                    var encoder = new RtmpsEncoder();
-                    var data = encoder.EncodeInvoke(id, packet);
+                    RTMPSEncoder encoder = new RTMPSEncoder();
+                    byte[] data = encoder.EncodeInvoke(id, packet);
 
-                    _sslStream.Write(data, 0, data.Length);
+                    sslStream.Write(data, 0, data.Length);
 
                     return id;
                 }
                 catch (IOException e)
                 {
                     // Clear the pending invoke
-                    _pendingInvokes.Remove(id);
+                    pendingInvokes.Remove(id);
 
                     // Rethrow
                     throw e;
@@ -747,30 +731,31 @@ namespace LoLLauncher
 
         private int InvokeWithCallback(string destination, object operation, object body, RiotGamesObject cb)
         {
-            if (_isConnected)
+            if (isConnected)
             {
-                _callbacks.Add(_invokeId, cb); // Register the callback
+                callbacks.Add(invokeID, cb); // Register the callback
                 return Invoke(destination, operation, body);
             }
-            Error(
-                "The client is not connected. Please make sure to connect before tring to execute an Invoke command.",
-                ErrorType.Invoke);
-            Disconnect();
-            return -1;
+            else
+            {
+                Error("The client is not connected. Please make sure to connect before tring to execute an Invoke command.", ErrorType.Invoke);
+                Disconnect();
+                return -1;
+            }
         }
 
         protected TypedObject WrapBody(object body, string destination, object operation)
         {
-            var headers = new TypedObject();
+            TypedObject headers = new TypedObject();
             headers.Add("DSRequestTimeout", 60);
-            headers.Add("DSId", _dsId);
+            headers.Add("DSId", DSId);
             headers.Add("DSEndpoint", "my-rtmps");
 
-            var ret = new TypedObject("flex.messaging.messages.RemotingMessage");
+            TypedObject ret = new TypedObject("flex.messaging.messages.RemotingMessage");
             ret.Add("operation", operation);
             ret.Add("source", null);
             ret.Add("timestamp", 0);
-            ret.Add("messageId", RtmpsEncoder.RandomUid());
+            ret.Add("messageId", RTMPSEncoder.RandomUID());
             ret.Add("timeToLive", 0);
             ret.Add("clientId", null);
             ret.Add("destination", destination);
@@ -780,15 +765,14 @@ namespace LoLLauncher
             return ret;
         }
 
-        protected int NextInvokeId()
+        protected int NextInvokeID()
         {
-            return _invokeId++;
+            return invokeID++;
         }
 
         #endregion
 
         #region Receive Methods
-
         private void MessageReceived(object messageBody)
         {
             if (OnMessageReceived != null)
@@ -797,23 +781,23 @@ namespace LoLLauncher
 
         private void BeginReceive()
         {
-            DecodeThread = new Thread(() =>
+            decodeThread = new Thread(() =>
             {
                 try
                 {
-                    var previousReceivedPacket = new Dictionary<int, Packet>();
-                    var currentPackets = new Dictionary<int, Packet>();
+                    Dictionary<int, Packet> previousReceivedPacket = new Dictionary<int, Packet>();
+                    Dictionary<int, Packet> currentPackets = new Dictionary<int, Packet>();
 
                     while (true)
                     {
-                        #region Basic Header
 
-                        var basicHeader = (byte) _sslStream.ReadByte();
-                        var basicHeaderStorage = new List<byte>();
-                        if (basicHeader == 255)
+                        #region Basic Header
+                        byte basicHeader = (byte)sslStream.ReadByte();
+                        List<byte> basicHeaderStorage = new List<byte>();
+                        if ((int)basicHeader == 255)
                             Disconnect();
 
-                        var channel = 0;
+                        int channel = 0;
                         //1 Byte Header
                         if ((basicHeader & 0x03) != 0)
                         {
@@ -823,7 +807,7 @@ namespace LoLLauncher
                         //2 Byte Header
                         else if ((basicHeader & 0x01) != 0)
                         {
-                            var byte2 = (byte) _sslStream.ReadByte();
+                            byte byte2 = (byte)sslStream.ReadByte();
                             channel = 64 + byte2;
                             basicHeaderStorage.Add(basicHeader);
                             basicHeaderStorage.Add(byte2);
@@ -831,20 +815,18 @@ namespace LoLLauncher
                         //3 Byte Header
                         else if ((basicHeader & 0x02) != 0)
                         {
-                            var byte2 = (byte) _sslStream.ReadByte();
-                            var byte3 = (byte) _sslStream.ReadByte();
+                            byte byte2 = (byte)sslStream.ReadByte();
+                            byte byte3 = (byte)sslStream.ReadByte();
                             basicHeaderStorage.Add(basicHeader);
                             basicHeaderStorage.Add(byte2);
                             basicHeaderStorage.Add(byte3);
-                            channel = 64 + byte2 + (256*byte3);
+                            channel = 64 + byte2 + (256 * byte3);
                         }
-
                         #endregion
 
                         #region Message Header
-
-                        var headerType = (basicHeader & 0xC0);
-                        var headerSize = 0;
+                        int headerType = (basicHeader & 0xC0);
+                        int headerSize = 0;
                         if (headerType == 0x00)
                             headerSize = 12;
                         else if (headerType == 0x40)
@@ -860,78 +842,78 @@ namespace LoLLauncher
                             currentPackets.Add(channel, new Packet());
                         }
 
-                        var p = currentPackets[channel];
+                        Packet p = currentPackets[channel];
                         p.AddToRaw(basicHeaderStorage.ToArray());
 
                         if (headerSize == 12)
                         {
                             //Timestamp
-                            var timestamp = new byte[3];
-                            for (var i = 0; i < 3; i++)
+                            byte[] timestamp = new byte[3];
+                            for (int i = 0; i < 3; i++)
                             {
-                                timestamp[i] = (byte) _sslStream.ReadByte();
+                                timestamp[i] = (byte)sslStream.ReadByte();
                                 p.AddToRaw(timestamp[i]);
                             }
 
                             //Message Length
-                            var messageLength = new byte[3];
-                            for (var i = 0; i < 3; i++)
+                            byte[] messageLength = new byte[3];
+                            for (int i = 0; i < 3; i++)
                             {
-                                messageLength[i] = (byte) _sslStream.ReadByte();
+                                messageLength[i] = (byte)sslStream.ReadByte();
                                 p.AddToRaw(messageLength[i]);
                             }
-                            var size = 0;
-                            for (var i = 0; i < 3; i++)
-                                size = size*256 + (messageLength[i] & 0xFF);
+                            int size = 0;
+                            for (int i = 0; i < 3; i++)
+                                size = size * 256 + (messageLength[i] & 0xFF);
                             p.SetSize(size);
 
                             //Message Type
-                            var messageType = _sslStream.ReadByte();
-                            p.AddToRaw((byte) messageType);
+                            int messageType = sslStream.ReadByte();
+                            p.AddToRaw((byte)messageType);
                             p.SetType(messageType);
 
                             //Message Stream ID
-                            var messageStreamId = new byte[4];
-                            for (var i = 0; i < 4; i++)
+                            byte[] messageStreamID = new byte[4];
+                            for (int i = 0; i < 4; i++)
                             {
-                                messageStreamId[i] = (byte) _sslStream.ReadByte();
-                                p.AddToRaw(messageStreamId[i]);
+                                messageStreamID[i] = (byte)sslStream.ReadByte();
+                                p.AddToRaw(messageStreamID[i]);
                             }
                         }
                         else if (headerSize == 8)
                         {
                             //Timestamp
-                            var timestamp = new byte[3];
-                            for (var i = 0; i < 3; i++)
+                            byte[] timestamp = new byte[3];
+                            for (int i = 0; i < 3; i++)
                             {
-                                timestamp[i] = (byte) _sslStream.ReadByte();
+                                timestamp[i] = (byte)sslStream.ReadByte();
                                 p.AddToRaw(timestamp[i]);
                             }
 
                             //Message Length
-                            var messageLength = new byte[3];
-                            for (var i = 0; i < 3; i++)
+                            byte[] messageLength = new byte[3];
+                            for (int i = 0; i < 3; i++)
                             {
-                                messageLength[i] = (byte) _sslStream.ReadByte();
+                                messageLength[i] = (byte)sslStream.ReadByte();
                                 p.AddToRaw(messageLength[i]);
                             }
-                            var size = 0;
-                            for (var i = 0; i < 3; i++)
-                                size = size*256 + (messageLength[i] & 0xFF);
+                            int size = 0;
+                            for (int i = 0; i < 3; i++)
+                                size = size * 256 + (messageLength[i] & 0xFF);
                             p.SetSize(size);
 
                             //Message Type
-                            var messageType = _sslStream.ReadByte();
-                            p.AddToRaw((byte) messageType);
+                            int messageType = sslStream.ReadByte();
+                            p.AddToRaw((byte)messageType);
                             p.SetType(messageType);
                         }
                         else if (headerSize == 4)
                         {
                             //Timestamp
-                            var timestamp = new byte[3];
-                            for (var i = 0; i < 3; i++)
+                            byte[] timestamp = new byte[3];
+                            for (int i = 0; i < 3; i++)
                             {
-                                timestamp[i] = (byte) _sslStream.ReadByte();
+                                timestamp[i] = (byte)sslStream.ReadByte();
                                 p.AddToRaw(timestamp[i]);
                             }
 
@@ -955,15 +937,13 @@ namespace LoLLauncher
                                 }
                             }
                         }
-
                         #endregion
 
                         #region Message Body
-
                         //DefaultChunkSize is 128
-                        for (var i = 0; i < 128; i++)
+                        for (int i = 0; i < 128; i++)
                         {
-                            var b = (byte) _sslStream.ReadByte();
+                            byte b = (byte)sslStream.ReadByte();
                             p.Add(b);
                             p.AddToRaw(b);
 
@@ -981,49 +961,49 @@ namespace LoLLauncher
 
                         if (currentPackets.ContainsKey(channel))
                             currentPackets.Remove(channel);
-
                         #endregion
+
 
                         // Decode result
                         TypedObject result;
-                        var decoder = new RtmpsDecoder();
+                        RTMPSDecoder decoder = new RTMPSDecoder();
                         if (p.GetPacketType() == 0x14) // Connect
                             result = decoder.DecodeConnect(p.GetData());
                         else if (p.GetPacketType() == 0x11) // Invoke
                             result = decoder.DecodeInvoke(p.GetData());
                         else if (p.GetPacketType() == 0x06) // Set peer bandwidth
                         {
-                            var data = p.GetData();
-                            var windowSize = 0;
-                            for (var i = 0; i < 4; i++)
-                                windowSize = windowSize*256 + (data[i] & 0xFF);
+                            byte[] data = p.GetData();
+                            int windowSize = 0;
+                            for (int i = 0; i < 4; i++)
+                                windowSize = windowSize * 256 + (data[i] & 0xFF);
                             int type = data[4];
                             continue;
                         }
                         else if (p.GetPacketType() == 0x05) // Window Acknowledgement Size
                         {
-                            var data = p.GetData();
-                            var windowSize = 0;
-                            for (var i = 0; i < 4; i++)
-                                windowSize = windowSize*256 + (data[i] & 0xFF);
+                            byte[] data = p.GetData();
+                            int windowSize = 0;
+                            for (int i = 0; i < 4; i++)
+                                windowSize = windowSize * 256 + (data[i] & 0xFF);
                             continue;
                         }
                         else if (p.GetPacketType() == 0x03) // Ack
                         {
-                            var data = p.GetData();
-                            var ackSize = 0;
-                            for (var i = 0; i < 4; i++)
-                                ackSize = ackSize*256 + (data[i] & 0xFF);
+                            byte[] data = p.GetData();
+                            int ackSize = 0;
+                            for (int i = 0; i < 4; i++)
+                                ackSize = ackSize * 256 + (data[i] & 0xFF);
                             continue;
                         }
                         else if (p.GetPacketType() == 0x02) //ABORT
                         {
-                            var data = p.GetData();
+                            byte[] data = p.GetData();
                             continue;
                         }
                         else if (p.GetPacketType() == 0x01) //MaxChunkSize
                         {
-                            var data = p.GetData();
+                            byte[] data = p.GetData();
                             continue;
                         }
                         else
@@ -1033,7 +1013,7 @@ namespace LoLLauncher
                         }
 
                         // Store result
-                        var id = result.GetInt("invokeId");
+                        int? id = result.GetInt("invokeId");
 
                         //Check to see if the result is valid.
                         //If it isn't, give an error and remove the callback if there is one.
@@ -1046,38 +1026,29 @@ namespace LoLLauncher
                         {
                             if (result.GetTO("data") != null)
                             {
-                                var to = result.GetTO("data");
+                                TypedObject to = result.GetTO("data");
                                 if (to.ContainsKey("body"))
                                 {
                                     if (to["body"] is TypedObject)
                                     {
-                                        new Thread(() =>
+                                        new Thread(new ThreadStart(() =>
                                         {
-                                            var body = (TypedObject) to["body"];
-                                            if (body.Type.Equals("com.riotgames.platform.game.GameDTO"))
-                                                MessageReceived(new GameDto(body));
-                                            else if (body.Type.Equals("com.riotgames.platform.game.PlayerCredentialsDto"))
+                                            TypedObject body = (TypedObject)to["body"];
+                                            if (body.type.Equals("com.riotgames.platform.game.GameDTO"))
+                                                MessageReceived(new GameDTO(body));
+                                            else if (body.type.Equals("com.riotgames.platform.game.PlayerCredentialsDto"))
                                                 MessageReceived(new PlayerCredentialsDto(body));
-                                            else if (
-                                                body.Type.Equals(
-                                                    "com.riotgames.platform.game.message.GameNotification"))
+                                            else if (body.type.Equals("com.riotgames.platform.game.message.GameNotification"))
                                                 MessageReceived(new GameNotification(body));
-                                            else if (
-                                                body.Type.Equals(
-                                                    "com.riotgames.platform.matchmaking.SearchingForMatchNotification"))
+                                            else if (body.type.Equals("com.riotgames.platform.matchmaking.SearchingForMatchNotification"))
                                                 MessageReceived(new SearchingForMatchNotification(body));
-                                            else if (
-                                                body.Type.Equals(
-                                                    "com.riotgames.platform.messaging.StoreFulfillmentNotification"))
+                                            else if (body.type.Equals("com.riotgames.platform.messaging.StoreFulfillmentNotification"))
                                                 MessageReceived(new StoreFulfillmentNotification(body));
-                                            else if (
-                                                body.Type.Equals(
-                                                    "com.riotgames.platform.messaging.StoreFulfillmentNotification"))
-                                                MessageReceived(
-                                                    new StoreAccountBalanceNotification(body));
+                                            else if (body.type.Equals("com.riotgames.platform.messaging.StoreFulfillmentNotification"))
+                                                MessageReceived(new StoreAccountBalanceNotification(body));
                                             else
                                                 MessageReceived(body);
-                                        }).Start();
+                                        })).Start();
                                     }
                                 }
                             }
@@ -1090,24 +1061,29 @@ namespace LoLLauncher
                         if (id == 0)
                         {
                         }
-                        else if (_callbacks.ContainsKey((int) id))
+                        else if (callbacks.ContainsKey((int)id))
                         {
-                            var cb = _callbacks[(int) id];
-                            _callbacks.Remove((int) id);
+                            RiotGamesObject cb = callbacks[(int)id];
+                            callbacks.Remove((int)id);
                             if (cb != null)
                             {
-                                var messageBody = result.GetTO("data").GetTO("body");
-                                new Thread(() => { cb.DoCallback(messageBody); }).Start();
+                                TypedObject messageBody = result.GetTO("data").GetTO("body");
+                                new Thread(() =>
+                                {
+                                    cb.DoCallback(messageBody);
+                                }).Start();
                             }
                         }
 
                         else
                         {
-                            _results.Add((int) id, result);
+                            results.Add((int)id, result);
                         }
 
-                        _pendingInvokes.Remove((int) id);
+                        pendingInvokes.Remove((int)id);
+
                     }
+
                 }
                 catch (Exception e)
                 {
@@ -1117,13 +1093,13 @@ namespace LoLLauncher
                     //Disconnect();
                 }
             });
-            DecodeThread.Start();
+            decodeThread.Start();
         }
 
 
         private TypedObject GetResult(int id)
         {
-            while (IsConnected() && !_results.ContainsKey(id))
+            while (IsConnected() && !results.ContainsKey(id))
             {
                 Thread.Sleep(10);
             }
@@ -1131,17 +1107,16 @@ namespace LoLLauncher
             if (!IsConnected())
                 return null;
 
-            var ret = _results[id];
-            _results.Remove(id);
+            TypedObject ret = results[id];
+            results.Remove(id);
             return ret;
         }
-
         private TypedObject PeekResult(int id)
         {
-            if (_results.ContainsKey(id))
+            if (results.ContainsKey(id))
             {
-                var ret = _results[id];
-                _results.Remove(id);
+                TypedObject ret = results[id];
+                results.Remove(id);
                 return ret;
             }
             return null;
@@ -1149,7 +1124,7 @@ namespace LoLLauncher
 
         private void Join()
         {
-            while (_pendingInvokes.Count > 0)
+            while (pendingInvokes.Count > 0)
             {
                 Thread.Sleep(10);
             }
@@ -1157,51 +1132,54 @@ namespace LoLLauncher
 
         private void Join(int id)
         {
-            while (IsConnected() && _pendingInvokes.Contains(id))
+            while (IsConnected() && pendingInvokes.Contains(id))
             {
                 Thread.Sleep(10);
             }
         }
-
         private void Cancel(int id)
         {
             // Remove from pending invokes (only affects join())
-            _pendingInvokes.Remove(id);
+            pendingInvokes.Remove(id);
 
             // Check if we've already received the result
             if (PeekResult(id) != null)
                 return;
             // Signify a cancelled invoke by giving it a null callback
-            _callbacks.Add(id, null);
+            else
+            {
+                callbacks.Add(id, null);
 
-            // Check for race condition
-            if (PeekResult(id) != null)
-                _callbacks.Remove(id);
+                // Check for race condition
+                if (PeekResult(id) != null)
+                    callbacks.Remove(id);
+            }
         }
 
         #endregion
 
+
+
         #region Public Client Methods
+
+
 
         #endregion
 
         #region General Returns
-
         public bool IsConnected()
         {
-            return _isConnected;
+            return isConnected;
         }
 
         public bool IsLoggedIn()
         {
-            return _isLoggedIn;
+            return isLoggedIn;
         }
-
-        public double AccountId()
+        public double AccountID()
         {
-            return _accountId;
+            return accountID;
         }
-
         #endregion
     }
 }

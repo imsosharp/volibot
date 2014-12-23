@@ -1,36 +1,45 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner.Masterybook
 {
-    public class MasteryBookPageDto : RiotGamesObject
+
+    public class MasteryBookPageDTO : RiotGamesObject
     {
-        public delegate void Callback(MasteryBookPageDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.summoner.masterybook.MasteryBookPageDTO";
-
-        public MasteryBookPageDto()
-        {
-        }
-
-        public MasteryBookPageDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public MasteryBookPageDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.platform.summoner.masterybook.MasteryBookPageDTO";
+
+        public MasteryBookPageDTO()
+        {
+        }
+
+        public MasteryBookPageDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public MasteryBookPageDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(MasteryBookPageDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("talentEntries")]
@@ -51,10 +60,5 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner.Masterybook
         [InternalName("summonerId")]
         public Double SummonerId { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

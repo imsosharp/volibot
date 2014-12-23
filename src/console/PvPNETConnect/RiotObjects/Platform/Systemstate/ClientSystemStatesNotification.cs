@@ -1,18 +1,22 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Systemstate
 {
+
     public class ClientSystemStatesNotification : RiotGamesObject
     {
-        public delegate void Callback(ClientSystemStatesNotification result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.systemstate.ClientSystemStatesNotification";
+        private string type = "com.riotgames.platform.systemstate.ClientSystemStatesNotification";
 
         public ClientSystemStatesNotification()
         {
@@ -20,21 +24,26 @@ namespace LoLLauncher.RiotObjects.Platform.Systemstate
 
         public ClientSystemStatesNotification(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public ClientSystemStatesNotification(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(ClientSystemStatesNotification result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("championTradeThroughLCDS")]
-        public Boolean ChampionTradeThroughLcds { get; set; }
+        public Boolean ChampionTradeThroughLCDS { get; set; }
 
         [InternalName("practiceGameEnabled")]
         public Boolean PracticeGameEnabled { get; set; }
@@ -73,16 +82,16 @@ namespace LoLLauncher.RiotObjects.Platform.Systemstate
         public Int32[] EnabledQueueIdsList { get; set; }
 
         [InternalName("unobtainableChampionSkinIDList")]
-        public Int32[] UnobtainableChampionSkinIdList { get; set; }
+        public Int32[] UnobtainableChampionSkinIDList { get; set; }
 
         [InternalName("archivedStatsEnabled")]
         public Boolean ArchivedStatsEnabled { get; set; }
 
         [InternalName("queueThrottleDTO")]
-        public Dictionary<String, Object> QueueThrottleDto { get; set; }
+        public Dictionary<String, Object> QueueThrottleDTO { get; set; }
 
         [InternalName("gameMapEnabledDTOList")]
-        public List<Dictionary<String, Object>> GameMapEnabledDtoList { get; set; }
+        public List<Dictionary<String, Object>> GameMapEnabledDTOList { get; set; }
 
         [InternalName("storeCustomerEnabled")]
         public Boolean StoreCustomerEnabled { get; set; }
@@ -159,10 +168,5 @@ namespace LoLLauncher.RiotObjects.Platform.Systemstate
         [InternalName("leaguesDecayMessagingEnabled")]
         public Boolean LeaguesDecayMessagingEnabled { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

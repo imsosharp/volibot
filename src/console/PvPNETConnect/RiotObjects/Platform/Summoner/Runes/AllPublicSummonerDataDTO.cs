@@ -1,39 +1,50 @@
-#region
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using LoLLauncher.RiotObjects.Platform.Summoner.Spellbook;
-
-#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner
 {
-    public class AllPublicSummonerDataDto : RiotGamesObject
+
+    public class AllPublicSummonerDataDTO : RiotGamesObject
     {
-        public delegate void Callback(AllPublicSummonerDataDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.summoner.AllPublicSummonerDataDTO";
-
-        public AllPublicSummonerDataDto()
-        {
-        }
-
-        public AllPublicSummonerDataDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public AllPublicSummonerDataDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.platform.summoner.AllPublicSummonerDataDTO";
+
+        public AllPublicSummonerDataDTO()
+        {
+        }
+
+        public AllPublicSummonerDataDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public AllPublicSummonerDataDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(AllPublicSummonerDataDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("spellBook")]
-        public SpellBookDto SpellBook { get; set; }
+        public SpellBookDTO SpellBook { get; set; }
 
         [InternalName("summonerDefaultSpells")]
         public SummonerDefaultSpells SummonerDefaultSpells { get; set; }
@@ -42,7 +53,7 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
         public SummonerTalentsAndPoints SummonerTalentsAndPoints { get; set; }
 
         [InternalName("summoner")]
-        public BasePublicSummonerDto Summoner { get; set; }
+        public BasePublicSummonerDTO Summoner { get; set; }
 
         [InternalName("summonerLevelAndPoints")]
         public SummonerLevelAndPoints SummonerLevelAndPoints { get; set; }
@@ -50,10 +61,5 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
         [InternalName("summonerLevel")]
         public SummonerLevel SummonerLevel { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

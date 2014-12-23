@@ -1,37 +1,47 @@
-#region
-
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using LoLLauncher.RiotObjects.Team.Stats;
-
-#endregion
+using LoLLauncher.RiotObjects.Team;
 
 namespace LoLLauncher.RiotObjects.Team.Dto
 {
-    public class TeamDto : RiotGamesObject
+
+    public class TeamDTO : RiotGamesObject
     {
-        public delegate void Callback(TeamDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.team.dto.TeamDTO";
-
-        public TeamDto()
-        {
-        }
-
-        public TeamDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public TeamDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.team.dto.TeamDTO";
+
+        public TeamDTO()
+        {
+        }
+
+        public TeamDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public TeamDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(TeamDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("teamStatSummary")]
@@ -44,7 +54,7 @@ namespace LoLLauncher.RiotObjects.Team.Dto
         public String Tag { get; set; }
 
         [InternalName("roster")]
-        public RosterDto Roster { get; set; }
+        public RosterDTO Roster { get; set; }
 
         [InternalName("lastGameDate")]
         public object LastGameDate { get; set; }
@@ -79,10 +89,5 @@ namespace LoLLauncher.RiotObjects.Team.Dto
         [InternalName("createDate")]
         public DateTime CreateDate { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

@@ -1,18 +1,23 @@
-#region
-
-using System;
 using LoLLauncher.RiotObjects.Platform.Game;
-
-#endregion
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Reroll.Pojo
 {
+
     public class AramPlayerParticipant : Participant
     {
-        public delegate void Callback(AramPlayerParticipant result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.reroll.pojo.AramPlayerParticipant";
+        private string type = "com.riotgames.platform.reroll.pojo.AramPlayerParticipant";
 
         public AramPlayerParticipant()
         {
@@ -20,17 +25,22 @@ namespace LoLLauncher.RiotObjects.Platform.Reroll.Pojo
 
         public AramPlayerParticipant(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public AramPlayerParticipant(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(AramPlayerParticipant result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("timeAddedToQueue")]
@@ -99,10 +109,5 @@ namespace LoLLauncher.RiotObjects.Platform.Reroll.Pojo
         [InternalName("teamParticipantId")]
         public Double TeamParticipantId { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

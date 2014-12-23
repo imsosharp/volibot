@@ -1,17 +1,22 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Team.Stats
 {
+
     public class MatchHistorySummary : RiotGamesObject
     {
-        public delegate void Callback(MatchHistorySummary result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.team.stats.MatchHistorySummary";
+        private string type = "com.riotgames.team.stats.MatchHistorySummary";
 
         public MatchHistorySummary()
         {
@@ -19,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Team.Stats
 
         public MatchHistorySummary(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public MatchHistorySummary(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(MatchHistorySummary result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("gameMode")]
@@ -65,10 +75,5 @@ namespace LoLLauncher.RiotObjects.Team.Stats
         [InternalName("opposingTeamKills")]
         public Int32 OpposingTeamKills { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

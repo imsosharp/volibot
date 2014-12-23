@@ -1,44 +1,48 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Kudos.Dto
 {
-    public class PendingKudosDto : RiotGamesObject
+    public class PendingKudosDTO : RiotGamesObject
     {
-        public delegate void Callback(PendingKudosDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.kudos.dto.PendingKudosDTO";
-
-        public PendingKudosDto()
-        {
-        }
-
-        public PendingKudosDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public PendingKudosDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.kudos.dto.PendingKudosDTO";
+
+        public PendingKudosDTO()
+        {
+        }
+
+        public PendingKudosDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public PendingKudosDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(PendingKudosDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("pendingCounts")]
         public Int32[] PendingCounts { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

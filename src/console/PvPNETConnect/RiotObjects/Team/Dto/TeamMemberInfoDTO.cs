@@ -1,35 +1,45 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Team.Dto
 {
-    public class TeamMemberInfoDto : RiotGamesObject
+
+    public class TeamMemberInfoDTO : RiotGamesObject
     {
-        public delegate void Callback(TeamMemberInfoDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.team.dto.TeamMemberInfoDTO";
-
-        public TeamMemberInfoDto()
-        {
-        }
-
-        public TeamMemberInfoDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public TeamMemberInfoDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.team.dto.TeamMemberInfoDTO";
+
+        public TeamMemberInfoDTO()
+        {
+        }
+
+        public TeamMemberInfoDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public TeamMemberInfoDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(TeamMemberInfoDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("joinDate")]
@@ -47,10 +57,5 @@ namespace LoLLauncher.RiotObjects.Team.Dto
         [InternalName("playerId")]
         public Double PlayerId { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

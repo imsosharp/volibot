@@ -1,17 +1,22 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner
 {
+
     public class Talent : RiotGamesObject
     {
-        public delegate void Callback(Talent result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.summoner.Talent";
+        private string type = "com.riotgames.platform.summoner.Talent";
 
         public Talent()
         {
@@ -19,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
 
         public Talent(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public Talent(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(Talent result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("index")]
@@ -77,10 +87,5 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
         [InternalName("level1Desc")]
         public String Level1Desc { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

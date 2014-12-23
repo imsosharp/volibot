@@ -1,17 +1,22 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner
 {
+
     public class SummonerLevel : RiotGamesObject
     {
-        public delegate void Callback(SummonerLevel result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.summoner.SummonerLevel";
+        private string type = "com.riotgames.platform.summoner.SummonerLevel";
 
         public SummonerLevel()
         {
@@ -19,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
 
         public SummonerLevel(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public SummonerLevel(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(SummonerLevel result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("expTierMod")]
@@ -56,10 +66,5 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
         [InternalName("summonerLevel")]
         public Double Level { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

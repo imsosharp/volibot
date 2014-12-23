@@ -1,36 +1,45 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Leagues.Pojo
 {
-    public class LeagueListDto : RiotGamesObject
+
+    public class LeagueListDTO : RiotGamesObject
     {
-        public delegate void Callback(LeagueListDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.leagues.pojo.LeagueListDTO";
-
-        public LeagueListDto()
-        {
-        }
-
-        public LeagueListDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public LeagueListDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.leagues.pojo.LeagueListDTO";
+
+        public LeagueListDTO()
+        {
+        }
+
+        public LeagueListDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public LeagueListDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(LeagueListDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("queue")]
@@ -46,15 +55,10 @@ namespace LoLLauncher.RiotObjects.Leagues.Pojo
         public String RequestorsRank { get; set; }
 
         [InternalName("entries")]
-        public List<LeagueItemDto> Entries { get; set; }
+        public List<LeagueItemDTO> Entries { get; set; }
 
         [InternalName("requestorsName")]
         public String RequestorsName { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

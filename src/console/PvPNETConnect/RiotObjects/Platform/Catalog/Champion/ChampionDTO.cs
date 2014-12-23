@@ -1,36 +1,46 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
+using LoLLauncher.RiotObjects;
 
 namespace LoLLauncher.RiotObjects.Platform.Catalog.Champion
 {
-    public class ChampionDto : RiotGamesObject
+
+    public class ChampionDTO : RiotGamesObject
     {
-        public delegate void Callback(ChampionDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.catalog.champion.ChampionDTO";
-
-        public ChampionDto()
-        {
-        }
-
-        public ChampionDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public ChampionDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.platform.catalog.champion.ChampionDTO";
+
+        public ChampionDTO()
+        {
+        }
+
+        public ChampionDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public ChampionDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(ChampionDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("searchTags")]
@@ -73,7 +83,7 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Champion
         public Boolean Active { get; set; }
 
         [InternalName("championSkins")]
-        public List<ChampionSkinDto> ChampionSkins { get; set; }
+        public List<ChampionSkinDTO> ChampionSkins { get; set; }
 
         [InternalName("description")]
         public String Description { get; set; }
@@ -87,10 +97,5 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Champion
         [InternalName("endDate")]
         public Int32 EndDate { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

@@ -1,465 +1,483 @@
-﻿#region
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using LoLLauncher;
+﻿using LoLLauncher;
 using LoLLauncher.RiotObjects.Platform.Catalog.Champion;
 using LoLLauncher.RiotObjects.Platform.Clientfacade.Domain;
 using LoLLauncher.RiotObjects.Platform.Game;
 using LoLLauncher.RiotObjects.Platform.Game.Message;
 using LoLLauncher.RiotObjects.Platform.Matchmaking;
 using LoLLauncher.RiotObjects.Platform.Statistics;
+using LoLLauncher.RiotObjects;
+using LoLLauncher.RiotObjects.Leagues.Pojo;
+using LoLLauncher.RiotObjects.Platform.Game.Practice;
+using LoLLauncher.RiotObjects.Platform.Harassment;
+using LoLLauncher.RiotObjects.Platform.Leagues.Client.Dto;
+using LoLLauncher.RiotObjects.Platform.Login;
+using LoLLauncher.RiotObjects.Platform.Reroll.Pojo;
+using LoLLauncher.RiotObjects.Platform.Statistics.Team;
+using LoLLauncher.RiotObjects.Platform.Summoner;
+using LoLLauncher.RiotObjects.Platform.Summoner.Boost;
+using LoLLauncher.RiotObjects.Platform.Summoner.Masterybook;
+using LoLLauncher.RiotObjects.Platform.Summoner.Runes;
+using LoLLauncher.RiotObjects.Platform.Summoner.Spellbook;
+using LoLLauncher.RiotObjects.Team;
+using LoLLauncher.RiotObjects.Team.Dto;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-#endregion
+using System.ComponentModel;
+using System.Data;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
+using LoLLauncher.RiotObjects.Platform.Game.Map;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.CompilerServices;
+using LoLLauncher.RiotObjects.Platform.Summoner.Icon;
+using LoLLauncher.RiotObjects.Platform.Catalog.Icon;
 
 namespace RitoBot
 {
     internal class RiotBot
     {
+        public LoginDataPacket loginPacket = new LoginDataPacket();
+        public GameDTO currentGame = new GameDTO();
+        public LoLConnection connection = new LoLConnection();
+        public List<ChampionDTO> availableChamps = new List<ChampionDTO>();
+        public LoLLauncher.RiotObjects.Platform.Catalog.Champion.ChampionDTO[] availableChampsArray;
+        public bool firstTimeInLobby = true;
+        public bool firstTimeInQueuePop = true;
+        public bool firstTimeInCustom = true;
+        public Process exeProcess;
+        public string ipath;
         public string Accountname;
-        public List<ChampionDto> AvailableChamps = new List<ChampionDto>();
-        public ChampionDto[] AvailableChampsArray;
-        public LoLConnection Connection = new LoLConnection();
-        public GameDto CurrentGame = new GameDto();
-        public Process ExeProcess;
-        public bool FirstTimeInCustom = true;
-        public bool FirstTimeInLobby = true;
-        public bool FirstTimeInQueuePop = true;
-        public string Ipath;
-        public LoginDataPacket LoginPacket = new LoginDataPacket();
         public string Password;
-        public string RegionUrl;
-        public int ThreadId;
+        public int threadID;
+        public double sumLevel { get; set; }
+        public double archiveSumLevel { get; set; }
+        public double rpBalance { get; set; }
+        public QueueTypes queueType { get; set; }
+        public QueueTypes actualQueueType { get; set; }
+
+        public string region { get; set; }
+        public string regionURL;
 
         public RiotBot(string username, string password, string reg, string path, int threadid, QueueTypes QueueType)
         {
-            Ipath = path;
+            ipath = path;
             Accountname = username;
             Password = password;
-            ThreadId = threadid;
-            this.QueueType = QueueType;
-            Region = reg;
-            Connection.OnConnect += connection_OnConnect;
-            Connection.OnDisconnect += connection_OnDisconnect;
-            Connection.OnError += connection_OnError;
-            Connection.OnLogin += connection_OnLogin;
-            Connection.OnLoginQueueUpdate += connection_OnLoginQueueUpdate;
-            Connection.OnMessageReceived += connection_OnMessageReceived;
-            switch (Region)
+            threadID = threadid;
+            queueType = QueueType;
+            region = reg;
+            connection.OnConnect += new LoLConnection.OnConnectHandler(this.connection_OnConnect);
+            connection.OnDisconnect += new LoLConnection.OnDisconnectHandler(this.connection_OnDisconnect);
+            connection.OnError += new LoLConnection.OnErrorHandler(this.connection_OnError);
+            connection.OnLogin += new LoLConnection.OnLoginHandler(this.connection_OnLogin);
+            connection.OnLoginQueueUpdate += new LoLConnection.OnLoginQueueUpdateHandler(this.connection_OnLoginQueueUpdate);
+            connection.OnMessageReceived += new LoLConnection.OnMessageReceivedHandler(this.connection_OnMessageReceived);
+            switch (region)
             {
                 case "EUW":
-                    Connection.Connect(username, password, LoLLauncher.Region.Euw, Program.Cversion);
+                    connection.Connect(username, password, Region.EUW, Program.cversion);
                     break;
                 case "EUNE":
-                    Connection.Connect(username, password, LoLLauncher.Region.Eun, Program.Cversion);
+                    connection.Connect(username, password, Region.EUN, Program.cversion);
                     break;
                 case "NA":
-                    Connection.Connect(username, password, LoLLauncher.Region.Na, Program.Cversion);
-                    RegionUrl = "NA1";
+                    connection.Connect(username, password, Region.NA, Program.cversion);
+                    regionURL = "NA1";
                     break;
                 case "KR":
-                    Connection.Connect(username, password, LoLLauncher.Region.Kr, Program.Cversion);
+                    connection.Connect(username, password, Region.KR, Program.cversion);
                     break;
                 case "BR":
-                    Connection.Connect(username, password, LoLLauncher.Region.Br, Program.Cversion);
+                    connection.Connect(username, password, Region.BR, Program.cversion);
                     break;
                 case "OCE":
-                    Connection.Connect(username, password, LoLLauncher.Region.Oce, Program.Cversion);
+                    connection.Connect(username, password, Region.OCE, Program.cversion);
                     break;
                 case "RU":
-                    Connection.Connect(username, password, LoLLauncher.Region.Ru, Program.Cversion);
+                    connection.Connect(username, password, Region.RU, Program.cversion);
                     break;
                 case "TR":
-                    Connection.Connect(username, password, LoLLauncher.Region.Tr, Program.Cversion);
+                    connection.Connect(username, password, Region.TR, Program.cversion);
                     break;
                 case "LAS":
-                    Connection.Connect(username, password, LoLLauncher.Region.Las, Program.Cversion);
+                    connection.Connect(username, password, Region.LAS, Program.cversion);
                     break;
                 case "LAN":
-                    Connection.Connect(username, password, LoLLauncher.Region.Lan, Program.Cversion);
+                    connection.Connect(username, password, Region.LAN, Program.cversion);
                     break;
             }
         }
 
-        public double SumLevel { get; set; }
-        public double ArchiveSumLevel { get; set; }
-        public double RpBalance { get; set; }
-        public QueueTypes QueueType { get; set; }
-        public QueueTypes ActualQueueType { get; set; }
-        public string Region { get; set; }
-
         public async void connection_OnMessageReceived(object sender, object message)
         {
-            if (message is GameDto)
+            if (message is GameDTO)
             {
-                var game = message as GameDto;
+                GameDTO game = message as GameDTO;
                 switch (game.GameState)
                 {
                     case "CHAMP_SELECT":
-                        if (FirstTimeInLobby)
+                        if (this.firstTimeInLobby)
                         {
-                            FirstTimeInLobby = false;
-                            UpdateStatus("In Champion Select", Accountname);
-                            var obj = await Connection.SetClientReceivedGameMessage(game.Id, "CHAMP_SELECT_CLIENT");
-                            if (QueueType != QueueTypes.Aram)
+                            firstTimeInLobby = false;
+                            updateStatus("In Champion Select", Accountname);
+                            object obj = await connection.SetClientReceivedGameMessage(game.Id, "CHAMP_SELECT_CLIENT");
+                            if (queueType != QueueTypes.ARAM)
                             {
-                                if (Program.ChampionId != "" && Program.ChampionId != "RANDOM")
+                                if (Program.championId != "" && Program.championId != "RANDOM")
                                 {
-                                    int spell1;
-                                    int spell2;
-                                    if (!Program.RndSpell)
+								
+                                    int Spell1;
+                                    int Spell2;
+                                    if (!Program.rndSpell)
                                     {
-                                        spell1 = Enums.SpellToId(Program.Spell1);
-                                        spell2 = Enums.SpellToId(Program.Spell2);
+                                        Spell1 = Enums.spellToId(Program.spell1);
+                                        Spell2 = Enums.spellToId(Program.spell2);
                                     }
                                     else
                                     {
                                         var random = new Random();
-                                        var spellList = new List<int> {13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4};
+                                        var spellList = new List<int> { 13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4 };
 
-                                        var index = random.Next(spellList.Count);
-                                        var index2 = random.Next(spellList.Count);
+                                        int index = random.Next(spellList.Count);
+                                        int index2 = random.Next(spellList.Count);
 
-                                        var randomSpell1 = spellList[index];
-                                        var randomSpell2 = spellList[index2];
+                                        int randomSpell1 = spellList[index];
+                                        int randomSpell2 = spellList[index2];
 
                                         if (randomSpell1 == randomSpell2)
                                         {
-                                            var index3 = random.Next(spellList.Count);
+                                            int index3 = random.Next(spellList.Count);
                                             randomSpell2 = spellList[index3];
                                         }
 
-                                        spell1 = Convert.ToInt32(randomSpell1);
-                                        spell2 = Convert.ToInt32(randomSpell2);
+                                        Spell1 = Convert.ToInt32(randomSpell1);
+                                        Spell2 = Convert.ToInt32(randomSpell2);
                                     }
 
-                                    await Connection.SelectSpells(spell1, spell2);
-
-                                    await Connection.SelectChampion(Enums.ChampionToId(Program.ChampionId));
-                                    await Connection.ChampionSelectCompleted();
+                                    await connection.SelectSpells(Spell1, Spell2);
+								
+                                    await connection.SelectChampion(Enums.championToId(Program.championId));
+                                    await connection.ChampionSelectCompleted();
                                 }
-                                else if (Program.ChampionId == "RANDOM")
+                                else if (Program.championId == "RANDOM")
                                 {
-                                    int spell1;
-                                    int spell2;
-                                    if (!Program.RndSpell)
+								
+                                    int Spell1;
+                                    int Spell2;
+                                    if (!Program.rndSpell)
                                     {
-                                        spell1 = Enums.SpellToId(Program.Spell1);
-                                        spell2 = Enums.SpellToId(Program.Spell2);
+                                        Spell1 = Enums.spellToId(Program.spell1);
+                                        Spell2 = Enums.spellToId(Program.spell2);
                                     }
                                     else
                                     {
                                         var random = new Random();
-                                        var spellList = new List<int> {13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4};
+                                        var spellList = new List<int> { 13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4 };
 
-                                        var index = random.Next(spellList.Count);
-                                        var index2 = random.Next(spellList.Count);
+                                        int index = random.Next(spellList.Count);
+                                        int index2 = random.Next(spellList.Count);
 
-                                        var randomSpell1 = spellList[index];
-                                        var randomSpell2 = spellList[index2];
+                                        int randomSpell1 = spellList[index];
+                                        int randomSpell2 = spellList[index2];
 
                                         if (randomSpell1 == randomSpell2)
                                         {
-                                            var index3 = random.Next(spellList.Count);
+                                            int index3 = random.Next(spellList.Count);
                                             randomSpell2 = spellList[index3];
                                         }
 
-                                        spell1 = Convert.ToInt32(randomSpell1);
-                                        spell2 = Convert.ToInt32(randomSpell2);
+                                        Spell1 = Convert.ToInt32(randomSpell1);
+                                        Spell2 = Convert.ToInt32(randomSpell2);
                                     }
 
-                                    await Connection.SelectSpells(spell1, spell2);
+                                    await connection.SelectSpells(Spell1, Spell2);
+									
+                                    var randAvailableChampsArray = availableChampsArray.Shuffle();
+                                    await connection.SelectChampion(randAvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
+                                    await connection.ChampionSelectCompleted();
 
-                                    var randAvailableChampsArray = AvailableChampsArray.Shuffle();
-                                    await
-                                        Connection.SelectChampion(
-                                            randAvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay)
-                                                .ChampionId);
-                                    await Connection.ChampionSelectCompleted();
                                 }
                                 else
                                 {
-                                    int spell1;
-                                    int spell2;
-                                    if (!Program.RndSpell)
+								
+                                    int Spell1;
+                                    int Spell2;
+                                    if (!Program.rndSpell)
                                     {
-                                        spell1 = Enums.SpellToId(Program.Spell1);
-                                        spell2 = Enums.SpellToId(Program.Spell2);
+                                        Spell1 = Enums.spellToId(Program.spell1);
+                                        Spell2 = Enums.spellToId(Program.spell2);
                                     }
                                     else
                                     {
                                         var random = new Random();
-                                        var spellList = new List<int> {13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4};
+                                        var spellList = new List<int> { 13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4 };
 
-                                        var index = random.Next(spellList.Count);
-                                        var index2 = random.Next(spellList.Count);
+                                        int index = random.Next(spellList.Count);
+                                        int index2 = random.Next(spellList.Count);
 
-                                        var randomSpell1 = spellList[index];
-                                        var randomSpell2 = spellList[index2];
+                                        int randomSpell1 = spellList[index];
+                                        int randomSpell2 = spellList[index2];
 
                                         if (randomSpell1 == randomSpell2)
                                         {
-                                            var index3 = random.Next(spellList.Count);
+                                            int index3 = random.Next(spellList.Count);
                                             randomSpell2 = spellList[index3];
                                         }
 
-                                        spell1 = Convert.ToInt32(randomSpell1);
-                                        spell2 = Convert.ToInt32(randomSpell2);
+                                        Spell1 = Convert.ToInt32(randomSpell1);
+                                        Spell2 = Convert.ToInt32(randomSpell2);
                                     }
 
-                                    await Connection.SelectSpells(spell1, spell2);
-
-                                    await
-                                        Connection.SelectChampion(
-                                            AvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay)
-                                                .ChampionId);
-                                    await Connection.ChampionSelectCompleted();
+                                    await connection.SelectSpells(Spell1, Spell2);
+									
+                                    await connection.SelectChampion(availableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
+                                    await connection.ChampionSelectCompleted();
                                 }
                             }
+                            break;
                         }
-                        break;
+                        else
+                            break;
                     case "POST_CHAMP_SELECT":
-                        FirstTimeInLobby = false;
-                        UpdateStatus("(Post Champ Select)", Accountname);
+                        firstTimeInLobby = false;
+                        this.updateStatus("(Post Champ Select)", Accountname);
                         break;
                     case "PRE_CHAMP_SELECT":
-                        UpdateStatus("(Pre Champ Select)", Accountname);
+                        this.updateStatus("(Pre Champ Select)", Accountname);
                         break;
                     case "GAME_START_CLIENT":
-                        UpdateStatus("Game client ran", Accountname);
+                        this.updateStatus("Game client ran", Accountname);
                         break;
                     case "GameClientConnectedToServer":
-                        UpdateStatus("Client connected to the server", Accountname);
+                        this.updateStatus("Client connected to the server", Accountname);
                         break;
                     case "IN_QUEUE":
-                        UpdateStatus("In Queue", Accountname);
+                        this.updateStatus("In Queue", Accountname);
                         break;
                     case "TERMINATED":
-                        UpdateStatus("Re-entering queue", Accountname);
-                        FirstTimeInQueuePop = true;
+                        this.updateStatus("Re-entering queue", Accountname);
+                        this.firstTimeInQueuePop = true;
                         break;
                     case "JOINING_CHAMP_SELECT":
-                        if (FirstTimeInQueuePop && game.StatusOfParticipants.Contains("1"))
+                        if (this.firstTimeInQueuePop && game.StatusOfParticipants.Contains("1"))
                         {
-                            UpdateStatus("Accepted Queue", Accountname);
-                            FirstTimeInQueuePop = false;
-                            FirstTimeInLobby = true;
-                            var obj = await Connection.AcceptPoppedGame(true);
+                            this.updateStatus("Accepted Queue", Accountname);
+                            this.firstTimeInQueuePop = false;
+                            this.firstTimeInLobby = true;
+                            object obj = await this.connection.AcceptPoppedGame(true);
+                            break;
                         }
-                        break;
+                        else
+                            break;
                 }
             }
             else if (message is PlayerCredentialsDto)
             {
-                var str =
-                    Directory.EnumerateDirectories((Ipath ?? "") + "RADS\\solutions\\lol_game_client_sln\\releases\\")
-                        .OrderBy(f => new DirectoryInfo(f).CreationTime)
-                        .Last() + "\\deploy\\";
-                var credentials = message as PlayerCredentialsDto;
-                var startInfo = new ProcessStartInfo();
+                string str = Enumerable.Last<string>((IEnumerable<string>)Enumerable.OrderBy<string, DateTime>(Directory.EnumerateDirectories((this.ipath ?? "") + "RADS\\solutions\\lol_game_client_sln\\releases\\"), (Func<string, DateTime>)(f => new DirectoryInfo(f).CreationTime))) + "\\deploy\\";
+                LoLLauncher.RiotObjects.Platform.Game.PlayerCredentialsDto credentials = message as PlayerCredentialsDto;
+                System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
                 startInfo.CreateNoWindow = false;
                 startInfo.WorkingDirectory = str;
                 startInfo.FileName = "League of Legends.exe";
                 startInfo.Arguments = "\"8394\" \"LoLLauncher.exe\" \"\" \"" + credentials.ServerIp + " " +
-                                      credentials.ServerPort + " " + credentials.EncryptionKey + " " +
-                                      credentials.SummonerId + "\"";
-                UpdateStatus("Launching League of Legends", Accountname);
-                new Thread(() =>
+                credentials.ServerPort + " " + credentials.EncryptionKey + " " + credentials.SummonerId + "\"";
+                updateStatus("Launching League of Legends", Accountname);
+                new Thread((ThreadStart)(() =>
                 {
-                    ExeProcess = Process.Start(startInfo);
-                    ExeProcess.Exited += exeProcess_Exited;
-                    while (ExeProcess.MainWindowHandle == IntPtr.Zero) ;
-                    ExeProcess.PriorityClass = ProcessPriorityClass.Idle;
-                    ExeProcess.EnableRaisingEvents = true;
-                }).Start();
+                    exeProcess = Process.Start(startInfo);
+                    exeProcess.Exited += exeProcess_Exited;
+                    while (exeProcess.MainWindowHandle == IntPtr.Zero) ;
+                    exeProcess.PriorityClass = ProcessPriorityClass.Idle;
+                    exeProcess.EnableRaisingEvents = true;
+                })).Start();
             }
             else if (!(message is GameNotification) && !(message is SearchingForMatchNotification))
             {
                 if (message is EndOfGameStats)
                 {
-                    var matchParams = new MatchMakerParams();
-                    if (QueueType == QueueTypes.IntroBot)
+                    LoLLauncher.RiotObjects.Platform.Matchmaking.MatchMakerParams matchParams = new LoLLauncher.RiotObjects.Platform.Matchmaking.MatchMakerParams();
+                    if (queueType == QueueTypes.INTRO_BOT)
                     {
                         matchParams.BotDifficulty = "INTRO";
                     }
-                    else if (QueueType == QueueTypes.BeginnerBot)
+                    else if (queueType == QueueTypes.BEGINNER_BOT)
                     {
                         matchParams.BotDifficulty = "EASY";
                     }
-                    else if (QueueType == QueueTypes.MediumBot)
+                    else if (queueType == QueueTypes.MEDIUM_BOT)
                     {
                         matchParams.BotDifficulty = "MEDIUM";
                     }
 
-                    if (SumLevel == 3 && ActualQueueType == QueueTypes.Normal_5X5)
+                    if (sumLevel == 3 && actualQueueType == QueueTypes.NORMAL_5x5)
                     {
-                        QueueType = ActualQueueType;
+                        queueType = actualQueueType;
                     }
-                    else if (SumLevel == 6 && ActualQueueType == QueueTypes.Aram)
+                    else if (sumLevel == 6 && actualQueueType == QueueTypes.ARAM)
                     {
-                        QueueType = ActualQueueType;
+                        queueType = actualQueueType;
                     }
-                    else if (SumLevel == 7 && ActualQueueType == QueueTypes.Normal_3X3)
+                    else if (sumLevel == 7 && actualQueueType == QueueTypes.NORMAL_3x3)
                     {
-                        QueueType = ActualQueueType;
+                        queueType = actualQueueType;
                     }
 
-                    matchParams.QueueIds = new Int32[1] {(int) QueueType};
-                    var m = await Connection.AttachToQueue(matchParams);
+                    matchParams.QueueIds = new Int32[1] { (int)queueType };
+                    LoLLauncher.RiotObjects.Platform.Matchmaking.SearchingForMatchNotification m = await connection.AttachToQueue(matchParams);
                     if (m.PlayerJoinFailures == null)
                     {
-                        UpdateStatus("In Queue: " + QueueType, Accountname);
+                        this.updateStatus("In Queue: " + queueType.ToString(), Accountname);
                     }
                     else
                     {
                         try
                         {
-                            UpdateStatus(
-                                "Couldn't enter Q - " + m.PlayerJoinFailures.Summoner.Name + " : " +
-                                m.PlayerJoinFailures.ReasonFailed, Accountname);
+                            updateStatus("Couldn't enter Q - " + m.PlayerJoinFailures.Summoner.Name + " : " + m.PlayerJoinFailures.ReasonFailed, Accountname);
                         }
-                        catch (Exception)
-                        {
-                            Console.WriteLine(
-                                "Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type.");
-                            Connection.Disconnect();
-                        }
+                        catch (Exception) { Console.WriteLine("Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type."); connection.Disconnect(); }
                     }
                 }
                 else
                 {
                     if (message.ToString().Contains("EndOfGameStats"))
                     {
-                        var eog = new EndOfGameStats();
+                        EndOfGameStats eog = new EndOfGameStats();
                         connection_OnMessageReceived(sender, eog);
-                        ExeProcess.Exited -= exeProcess_Exited;
-                        ExeProcess.Kill();
-                        LoginPacket = await Connection.GetLoginDataPacketForUser();
-                        ArchiveSumLevel = SumLevel;
-                        SumLevel = LoginPacket.AllSummonerData.SummonerLevel.Level;
-                        if (SumLevel != ArchiveSumLevel)
+                        exeProcess.Exited -= exeProcess_Exited;
+                        exeProcess.Kill();
+                        loginPacket = await this.connection.GetLoginDataPacketForUser();
+                        archiveSumLevel = sumLevel;
+                        sumLevel = loginPacket.AllSummonerData.SummonerLevel.Level;
+                        if (sumLevel != archiveSumLevel)
                         {
-                            LevelUp();
+                            levelUp();
                         }
                     }
                 }
             }
         }
 
-        private void exeProcess_Exited(object sender, EventArgs e)
+        void exeProcess_Exited(object sender, EventArgs e)
         {
-            UpdateStatus("Restart League of Legends.", Accountname);
-            Thread.Sleep(1000);
-            if (LoginPacket.ReconnectInfo != null && LoginPacket.ReconnectInfo.Game != null)
-            {
-                connection_OnMessageReceived(sender, LoginPacket.ReconnectInfo.PlayerCredentials);
-            }
-            else
-                connection_OnMessageReceived(sender, new EndOfGameStats());
+           updateStatus("Restart League of Legends.", Accountname);
+           Thread.Sleep(1000);
+           if (this.loginPacket.ReconnectInfo != null && this.loginPacket.ReconnectInfo.Game != null)
+           {
+               this.connection_OnMessageReceived(sender, (object)this.loginPacket.ReconnectInfo.PlayerCredentials);
+           }
+           else
+               this.connection_OnMessageReceived(sender, (object)new EndOfGameStats());
         }
-
+        
         [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
-
+        static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+        
         [DllImport("user32.dll", SetLastError = true)]
-        internal static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
-
-        private void UpdateStatus(string status, string accname)
+        internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+       
+        private void updateStatus(string status, string accname)
         {
-            if (Program.LoadGui)
-                Program.MainWindow.Print(string.Concat(new object[4]
-                {
-                    "[",
-                    accname,
-                    "]: ",
-                    status
-                }));
-            Console.WriteLine(string.Concat("[", DateTime.Now, "] ", "[", accname, "]: ", status));
-        }
-
+            if (Program.LoadGUI) Program.MainWindow.Print(string.Concat(new object[4]
+              {     
+                (object) "[",
+                (object) accname,
+                (object) "]: ",
+                (object) status
+              }));
+            Console.WriteLine(string.Concat(new object[7]
+              {
+                (object) "[",
+                (object) DateTime.Now,
+                (object) "] ",        
+                (object) "[",
+                (object) accname,
+                (object) "]: ",
+                (object) status
+              }));
+        }        
+        
         private async void RegisterNotifications()
         {
-            var obj1 = await Connection.Subscribe("bc", Connection.AccountId());
-            var obj2 = await Connection.Subscribe("cn", Connection.AccountId());
-            var obj3 = await Connection.Subscribe("gn", Connection.AccountId());
+            object obj1 = await this.connection.Subscribe("bc", this.connection.AccountID());
+            object obj2 = await this.connection.Subscribe("cn", this.connection.AccountID());
+            object obj3 = await this.connection.Subscribe("gn", this.connection.AccountID());
         }
-
+        
         private void connection_OnLoginQueueUpdate(object sender, int positionInLine)
         {
             if (positionInLine <= 0)
                 return;
-            UpdateStatus("Position to login: " + positionInLine, Accountname);
+            this.updateStatus("Position to login: " + (object)positionInLine, Accountname);
         }
 
         private void connection_OnLogin(object sender, string username, string ipAddress)
         {
-            new Thread(async () =>
-            {
-                UpdateStatus("Connecting...", Accountname);
-                RegisterNotifications();
-                LoginPacket = await Connection.GetLoginDataPacketForUser();
-                if (LoginPacket.AllSummonerData == null)
+            new Thread((ThreadStart)(async () =>
+            { 
+                updateStatus("Connecting...", Accountname);
+                this.RegisterNotifications();
+                this.loginPacket = await this.connection.GetLoginDataPacketForUser(); 
+                if (loginPacket.AllSummonerData == null)
                 {
-                    var rnd = new Random();
-                    var summonerName = Accountname;
+                    Random rnd = new Random();
+                    String summonerName = Accountname;
                     if (summonerName.Length > 16)
-                        summonerName = summonerName.Substring(0, 12) + new Random().Next(1000, 9999);
-                    var sumData = await Connection.CreateDefaultSummoner(summonerName);
-                    LoginPacket.AllSummonerData = sumData;
-                    UpdateStatus("Created Summonername " + summonerName, Accountname);
+                        summonerName = summonerName.Substring(0, 12) + new Random().Next(1000, 9999).ToString();
+                    LoLLauncher.RiotObjects.Platform.Summoner.AllSummonerData sumData = await connection.CreateDefaultSummoner(summonerName);
+                    loginPacket.AllSummonerData = sumData;
+                    updateStatus("Created Summonername " + summonerName, Accountname);
                 }
-                SumLevel = LoginPacket.AllSummonerData.SummonerLevel.Level;
-                var sumName = LoginPacket.AllSummonerData.Summoner.Name;
-                var sumId = LoginPacket.AllSummonerData.Summoner.SumId;
-                RpBalance = LoginPacket.RpBalance;
-                if (SumLevel > Program.MaxLevel || SumLevel == Program.MaxLevel)
+                sumLevel = loginPacket.AllSummonerData.SummonerLevel.Level;
+                string sumName = loginPacket.AllSummonerData.Summoner.Name;
+                double sumId = loginPacket.AllSummonerData.Summoner.SumId;
+                rpBalance = loginPacket.RpBalance;
+                if (sumLevel > Program.maxLevel || sumLevel == Program.maxLevel)
                 {
-                    Connection.Disconnect();
-                    UpdateStatus("Summoner: " + sumName + " is already max level.", Accountname);
-                    UpdateStatus("Log into new account.", Accountname);
-                    Program.LognNewAccount();
+                    connection.Disconnect();
+                    updateStatus("Summoner: " + sumName + " is already max level.", Accountname);
+                    updateStatus("Log into new account.", Accountname);
+                    Program.lognNewAccount();
                     return;
                 }
-                if (RpBalance == 400.0 && Program.BuyBoost)
+                if (rpBalance == 400.0 && Program.buyBoost)
                 {
-                    UpdateStatus("Buying XP Boost", Accountname);
+                    updateStatus("Buying XP Boost", Accountname);
                     try
                     {
-                        var t = new Task(BuyBoost);
+                        Task t = new Task(buyBoost);
                         t.Start();
                     }
                     catch (Exception exception)
                     {
-                        UpdateStatus("Couldn't buy RP Boost.\n" + exception, Accountname);
+                        updateStatus("Couldn't buy RP Boost.\n" + exception, Accountname);
                     }
                 }
-                if (SumLevel < 3.0 && QueueType == QueueTypes.Normal_5X5)
+                if (sumLevel < 3.0 && queueType == QueueTypes.NORMAL_5x5)
                 {
-                    UpdateStatus("Need to be Level 3 before NORMAL_5x5 queue.", Accountname);
-                    UpdateStatus("Joins Co-Op vs AI (Beginner) queue until 3", Accountname);
-                    QueueType = QueueTypes.BeginnerBot;
-                    ActualQueueType = QueueTypes.Normal_5X5;
-                }
-                else if (SumLevel < 6.0 && QueueType == QueueTypes.Aram)
+                    this.updateStatus("Need to be Level 3 before NORMAL_5x5 queue.", Accountname);
+                    this.updateStatus("Joins Co-Op vs AI (Beginner) queue until 3", Accountname);
+                    queueType = QueueTypes.BEGINNER_BOT;
+                    actualQueueType = QueueTypes.NORMAL_5x5;
+                } else if (sumLevel < 6.0 && queueType == QueueTypes.ARAM)
                 {
-                    UpdateStatus("Need to be Level 6 before ARAM queue.", Accountname);
-                    UpdateStatus("Joins Co-Op vs AI (Beginner) queue until 6", Accountname);
-                    QueueType = QueueTypes.BeginnerBot;
-                    ActualQueueType = QueueTypes.Aram;
-                }
-                else if (SumLevel < 7.0 && QueueType == QueueTypes.Normal_3X3)
+                    this.updateStatus("Need to be Level 6 before ARAM queue.", Accountname);
+                    this.updateStatus("Joins Co-Op vs AI (Beginner) queue until 6", Accountname);
+                    queueType = QueueTypes.BEGINNER_BOT;
+                    actualQueueType = QueueTypes.ARAM;
+                } else if (sumLevel < 7.0 && queueType == QueueTypes.NORMAL_3x3)
                 {
-                    UpdateStatus("Need to be Level 7 before NORMAL_3x3 queue.", Accountname);
-                    UpdateStatus("Joins Co-Op vs AI (Beginner) queue until 7", Accountname);
-                    QueueType = QueueTypes.BeginnerBot;
-                    ActualQueueType = QueueTypes.Normal_3X3;
+                    this.updateStatus("Need to be Level 7 before NORMAL_3x3 queue.", Accountname);
+                    this.updateStatus("Joins Co-Op vs AI (Beginner) queue until 7", Accountname);
+                    queueType = QueueTypes.BEGINNER_BOT;
+                    actualQueueType = QueueTypes.NORMAL_3x3;
                 }
                 /* Should be randomize the summonericon on every login,
                  * but only works with extra icons, so it crashes if you only got the standards.
@@ -477,107 +495,102 @@ namespace RitoBot
                 int randomIcon = availableIcons[index];
                 Console.WriteLine(" | Choose from List: " + randomIcon);
                 await connection.UpdateProfileIconId(randomIcon);*/
-                UpdateStatus(
-                    "Logged in as " + LoginPacket.AllSummonerData.Summoner.Name + " @ level " +
-                    LoginPacket.AllSummonerData.SummonerLevel.Level, Accountname);
-                AvailableChampsArray = await Connection.GetAvailableChampions();
-                var player = await Connection.CreatePlayer();
-                if (LoginPacket.ReconnectInfo != null && LoginPacket.ReconnectInfo.Game != null)
+                updateStatus("Logged in as " + loginPacket.AllSummonerData.Summoner.Name + " @ level " + loginPacket.AllSummonerData.SummonerLevel.Level, Accountname);
+                availableChampsArray = await connection.GetAvailableChampions();
+                LoLLauncher.RiotObjects.Team.Dto.PlayerDTO player = await connection.CreatePlayer();
+                if (this.loginPacket.ReconnectInfo != null && this.loginPacket.ReconnectInfo.Game != null)
                 {
-                    connection_OnMessageReceived(sender, LoginPacket.ReconnectInfo.PlayerCredentials);
+                    this.connection_OnMessageReceived(sender, (object)this.loginPacket.ReconnectInfo.PlayerCredentials);
                 }
                 else
-                    connection_OnMessageReceived(sender, new EndOfGameStats());
-            }).Start();
+                    this.connection_OnMessageReceived(sender, (object)new EndOfGameStats());
+            })).Start();
         }
-
-        private void connection_OnError(object sender, Error error)
+        
+        private void connection_OnError(object sender, LoLLauncher.Error error)
         {
             if (error.Message.Contains("is not owned by summoner"))
             {
                 return;
             }
-            if (error.Message.Contains("Your summoner level is too low to select the spell"))
+            else if (error.Message.Contains("Your summoner level is too low to select the spell"))
             {
                 var random = new Random();
-                var spellList = new List<int> {13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4};
+                var spellList = new List<int> { 13, 6, 7, 10, 1, 11, 21, 12, 3, 14, 2, 4 };
 
-                var index = random.Next(spellList.Count);
-                var index2 = random.Next(spellList.Count);
+                int index = random.Next(spellList.Count);
+                int index2 = random.Next(spellList.Count);
 
-                var randomSpell1 = spellList[index];
-                var randomSpell2 = spellList[index2];
+                int randomSpell1 = spellList[index];
+                int randomSpell2 = spellList[index2];
 
                 if (randomSpell1 == randomSpell2)
                 {
-                    var index3 = random.Next(spellList.Count);
+                    int index3 = random.Next(spellList.Count);
                     randomSpell2 = spellList[index3];
                 }
 
-                var spell1 = Convert.ToInt32(randomSpell1);
-                var spell2 = Convert.ToInt32(randomSpell2);
+                int Spell1 = Convert.ToInt32(randomSpell1);
+                int Spell2 = Convert.ToInt32(randomSpell2);
                 return;
             }
-            UpdateStatus("error received:\n" + error.Message, Accountname);
+            this.updateStatus("error received:\n" + error.Message, Accountname);
         }
-
+        
         private void connection_OnDisconnect(object sender, EventArgs e)
         {
-            Program.ConnectedAccs -= 1;
-            Console.Title = " Current Connected: " + Program.ConnectedAccs;
-            UpdateStatus("Disconnected", Accountname);
+            Program.connectedAccs -= 1;
+            Console.Title = " Current Connected: " + Program.connectedAccs;
+            this.updateStatus("Disconnected", Accountname);
         }
-
+       
         private void connection_OnConnect(object sender, EventArgs e)
         {
-            Program.ConnectedAccs += 1;
-            Console.Title = " Current Connected: " + Program.ConnectedAccs;
+            Program.connectedAccs += 1;
+            Console.Title = " Current Connected: " + Program.connectedAccs;
         }
-
-        public void LevelUp()
+ 
+        public void levelUp()
         {
-            UpdateStatus("Level Up: " + SumLevel, Accountname);
-            RpBalance = LoginPacket.RpBalance;
-            if (SumLevel >= Program.MaxLevel)
+            updateStatus("Level Up: " + sumLevel, Accountname);
+            rpBalance = loginPacket.RpBalance;
+            if (sumLevel >= Program.maxLevel)
             {
-                Connection.Disconnect();
+                connection.Disconnect();
                 //bool connectStatus = await connection.IsConnected();
-                if (!Connection.IsConnected())
-                {
-                    Program.LognNewAccount();
+                if (!connection.IsConnected()) {
+                Program.lognNewAccount(); 
                 }
             }
-            if (RpBalance == 400.0 && Program.BuyBoost)
+            if (rpBalance == 400.0 && Program.buyBoost)
             {
-                UpdateStatus("Buying XP Boost", Accountname);
+                updateStatus("Buying XP Boost", Accountname);
                 try
                 {
-                    var t = new Task(BuyBoost);
+                    Task t = new Task(buyBoost);
                     t.Start();
                 }
                 catch (Exception exception)
                 {
-                    UpdateStatus("Couldn't buy RP Boost.\n" + exception, Accountname);
+                    updateStatus("Couldn't buy RP Boost.\n" + exception, Accountname);
                 }
             }
         }
-
-        private async void BuyBoost()
+        async void buyBoost()
         {
             try
             {
-                var url = await Connection.GetStoreUrl();
-                var httpClient = new HttpClient();
+                string url = await connection.GetStoreUrl();
+                HttpClient httpClient = new HttpClient();
                 Console.WriteLine(url);
                 await httpClient.GetStringAsync(url);
 
-                var storeUrl = "https://store." + RegionUrl.ToLower() +
-                               "1.lol.riotgames.com/store/tabs/view/boosts/1";
-                await httpClient.GetStringAsync(storeUrl);
+                string storeURL = "https://store." + regionURL.ToLower() + "1.lol.riotgames.com/store/tabs/view/boosts/1";
+                await httpClient.GetStringAsync(storeURL);
 
-                var purchaseUrl = "https://store." + RegionUrl.ToLower() + "1.lol.riotgames.com/store/purchase/item";
+                string purchaseURL = "https://store." + regionURL.ToLower() + "1.lol.riotgames.com/store/purchase/item";
 
-                var storeItemList = new List<KeyValuePair<string, string>>();
+                List<KeyValuePair<string, string>> storeItemList = new List<KeyValuePair<string, string>>();
                 storeItemList.Add(new KeyValuePair<string, string>("item_id", "boosts_2"));
                 storeItemList.Add(new KeyValuePair<string, string>("currency_type", "rp"));
                 storeItemList.Add(new KeyValuePair<string, string>("quantity", "1"));
@@ -586,9 +599,9 @@ namespace RitoBot
                 storeItemList.Add(new KeyValuePair<string, string>("duration_type", "PURCHASED"));
                 storeItemList.Add(new KeyValuePair<string, string>("duration", "3"));
                 HttpContent httpContent = new FormUrlEncodedContent(storeItemList);
-                await httpClient.PostAsync(purchaseUrl, httpContent);
+                await httpClient.PostAsync(purchaseURL, httpContent);
 
-                UpdateStatus("Bought 'XP Boost: 3 Days'!", Accountname);
+                updateStatus("Bought 'XP Boost: 3 Days'!", Accountname);
                 httpClient.Dispose();
             }
             catch (Exception e)
@@ -616,10 +629,10 @@ namespace RitoBot
         private static IEnumerable<T> ShuffleIterator<T>(
             this IEnumerable<T> source, Random rng)
         {
-            var buffer = source.ToList();
-            for (var i = 0; i < buffer.Count; i++)
+            List<T> buffer = source.ToList();
+            for (int i = 0; i < buffer.Count; i++)
             {
-                var j = rng.Next(i, buffer.Count);
+                int j = rng.Next(i, buffer.Count);
                 yield return buffer[j];
 
                 buffer[j] = buffer[i];

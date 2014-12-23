@@ -1,35 +1,45 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Leagues.Pojo
 {
-    public class LeagueItemDto : RiotGamesObject
+
+    public class LeagueItemDTO : RiotGamesObject
     {
-        public delegate void Callback(LeagueItemDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.leagues.pojo.LeagueItemDTO";
-
-        public LeagueItemDto()
-        {
-        }
-
-        public LeagueItemDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public LeagueItemDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.leagues.pojo.LeagueItemDTO";
+
+        public LeagueItemDTO()
+        {
+        }
+
+        public LeagueItemDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public LeagueItemDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(LeagueItemDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("previousDayLeaguePosition")]
@@ -86,10 +96,5 @@ namespace LoLLauncher.RiotObjects.Leagues.Pojo
         [InternalName("wins")]
         public Int32 Wins { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

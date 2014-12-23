@@ -1,35 +1,45 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Game
 {
-    public class GameTypeConfigDto : RiotGamesObject
+
+    public class GameTypeConfigDTO : RiotGamesObject
     {
-        public delegate void Callback(GameTypeConfigDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.game.GameTypeConfigDTO";
-
-        public GameTypeConfigDto()
-        {
-        }
-
-        public GameTypeConfigDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public GameTypeConfigDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.platform.game.GameTypeConfigDTO";
+
+        public GameTypeConfigDTO()
+        {
+        }
+
+        public GameTypeConfigDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public GameTypeConfigDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(GameTypeConfigDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("id")]
@@ -59,10 +69,5 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         [InternalName("postPickTimerDuration")]
         public Int32 PostPickTimerDuration { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

@@ -1,17 +1,22 @@
-﻿#region
-
-using System;
-
-#endregion
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace LoLLauncher.RiotObjects.Platform.Messaging
 {
-    internal class StoreAccountBalanceNotification : RiotGamesObject
+    class StoreAccountBalanceNotification : RiotGamesObject
     {
-        public delegate void Callback(StoreAccountBalanceNotification result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.reroll.pojo.StoreAccountBalanceNotification";
+        private string type = "com.riotgames.platform.reroll.pojo.StoreAccountBalanceNotification";
 
         public StoreAccountBalanceNotification()
         {
@@ -19,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Messaging
 
         public StoreAccountBalanceNotification(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public StoreAccountBalanceNotification(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(StoreAccountBalanceNotification result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("rp")]
@@ -38,10 +48,5 @@ namespace LoLLauncher.RiotObjects.Platform.Messaging
         [InternalName("ip")]
         public Double Ip { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

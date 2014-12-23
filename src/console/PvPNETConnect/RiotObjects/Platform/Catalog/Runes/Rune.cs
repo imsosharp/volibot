@@ -1,18 +1,23 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
+using LoLLauncher.RiotObjects.Platform.Catalog;
 
 namespace LoLLauncher.RiotObjects.Platform.Catalog.Runes
 {
+
     public class Rune : RiotGamesObject
     {
-        public delegate void Callback(Rune result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.catalog.runes.Rune";
+        private string type = "com.riotgames.platform.catalog.runes.Rune";
 
         public Rune()
         {
@@ -20,17 +25,22 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Runes
 
         public Rune(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public Rune(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(Rune result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("imagePath")]
@@ -69,10 +79,5 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Runes
         [InternalName("uses")]
         public object Uses { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

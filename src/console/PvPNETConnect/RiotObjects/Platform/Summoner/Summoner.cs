@@ -1,18 +1,22 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner
 {
+
     public class Summoner : RiotGamesObject
     {
-        public delegate void Callback(Summoner result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.summoner.Summoner";
+        private string type = "com.riotgames.platform.summoner.Summoner";
 
         public Summoner()
         {
@@ -20,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
 
         public Summoner(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public Summoner(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(Summoner result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("seasonTwoTier")]
@@ -81,10 +90,5 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
         [InternalName("socialNetworkUserIds")]
         public List<object> SocialNetworkUserIds { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

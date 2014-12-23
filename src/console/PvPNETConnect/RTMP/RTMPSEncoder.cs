@@ -1,383 +1,383 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
-
-#endregion
 
 namespace LoLLauncher
 {
-    public class RtmpsEncoder
-    {
-        public long StartTime = (long) DateTime.Now.TimeOfDay.TotalMilliseconds;
+   public class RTMPSEncoder
+   {
 
-        public byte[] AddHeaders(byte[] data)
-        {
-            var result = new List<byte>();
+      public long startTime = (long)DateTime.Now.TimeOfDay.TotalMilliseconds;
 
-            // Header byte
-            result.Add(0x03);
+      public byte[] AddHeaders(byte[] data)
+      {
+         List<byte> result = new List<byte>();
 
-            // Timestamp
-            var timediff = ((long) DateTime.Now.TimeOfDay.TotalMilliseconds - StartTime);
-            result.Add((byte) ((timediff & 0xFF0000) >> 16));
-            result.Add((byte) ((timediff & 0x00FF00) >> 8));
-            result.Add((byte) (timediff & 0x0000FF));
+         // Header byte
+         result.Add((byte)0x03);
 
-            // Body size
-            result.Add((byte) ((data.Length & 0xFF0000) >> 16));
-            result.Add((byte) ((data.Length & 0x00FF00) >> 8));
-            result.Add((byte) (data.Length & 0x0000FF));
+         // Timestamp
+         long timediff = ((long)DateTime.Now.TimeOfDay.TotalMilliseconds - startTime);
+         result.Add((byte)((timediff & 0xFF0000) >> 16));
+         result.Add((byte)((timediff & 0x00FF00) >> 8));
+         result.Add((byte)(timediff & 0x0000FF));
 
-            // Content type
-            result.Add(0x11);
+         // Body size
+         result.Add((byte)((data.Length & 0xFF0000) >> 16));
+         result.Add((byte)((data.Length & 0x00FF00) >> 8));
+         result.Add((byte)(data.Length & 0x0000FF));
 
-            // Source ID
-            result.Add(0x00);
-            result.Add(0x00);
-            result.Add(0x00);
-            result.Add(0x00);
+         // Content type
+         result.Add((byte)0x11);
 
-            // Add body
-            for (var i = 0; i < data.Length; i++)
-            {
-                result.Add(data[i]);
-                if (i%128 == 127 && i != data.Length - 1)
-                    result.Add(0xC3);
-            }
+         // Source ID
+         result.Add((byte)0x00);
+         result.Add((byte)0x00);
+         result.Add((byte)0x00);
+         result.Add((byte)0x00);
 
-            var ret = new byte[result.Count];
-            for (var i = 0; i < ret.Length; i++)
-                ret[i] = result[i];
+         // Add body
+         for (int i = 0; i < data.Length; i++)
+         {
+            result.Add(data[i]);
+            if (i % 128 == 127 && i != data.Length - 1)
+               result.Add((byte)0xC3);
+         }
 
-            return ret;
-        }
+         byte[] ret = new byte[result.Count];
+         for (int i = 0; i < ret.Length; i++)
+            ret[i] = result[i];
 
-        public byte[] EncodeConnect(Dictionary<string, object> paramaters)
-        {
-            var result = new List<Byte>();
+         return ret;
+      }
 
-            WriteStringAmf0(result, "connect");
-            WriteIntAmf0(result, 1); // invokeId
+      public byte[] EncodeConnect(Dictionary<string, object> paramaters)
+      {
+         List<Byte> result = new List<Byte>();
 
-            // Write params
-            result.Add(0x11); // AMF3 object
-            result.Add(0x09); // Array
-            WriteAssociativeArray(result, paramaters);
+         WriteStringAMF0(result, "connect");
+         WriteIntAMF0(result, 1); // invokeId
 
-            // Write service call args
-            result.Add(0x01);
-            result.Add(0x00); // false
-            WriteStringAmf0(result, "nil"); // "nil"
-            WriteStringAmf0(result, ""); // ""
+         // Write params
+         result.Add((byte)0x11); // AMF3 object
+         result.Add((byte)0x09); // Array
+         WriteAssociativeArray(result, paramaters);
 
-            // Set up CommandMessage
-            var cm = new TypedObject("flex.messaging.messages.CommandMessage");
-            cm.Add("operation", 5);
-            cm.Add("correlationId", "");
-            cm.Add("timestamp", 0);
-            cm.Add("messageId", RandomUid());
-            cm.Add("body", new TypedObject(null));
-            cm.Add("destination", "");
-            var headers = new Dictionary<string, object>();
-            headers.Add("DSMessagingVersion", 1.0);
-            headers.Add("DSId", "my-rtmps");
-            cm.Add("headers", headers);
-            cm.Add("clientId", null);
-            cm.Add("timeToLive", 0);
+         // Write service call args
+         result.Add((byte)0x01);
+         result.Add((byte)0x00); // false
+         WriteStringAMF0(result, "nil"); // "nil"
+         WriteStringAMF0(result, ""); // ""
 
-            // Write CommandMessage
-            result.Add(0x11); // AMF3 object
-            Encode(result, cm);
+         // Set up CommandMessage
+         TypedObject cm = new TypedObject("flex.messaging.messages.CommandMessage");
+         cm.Add("operation", 5);
+         cm.Add("correlationId", "");
+         cm.Add("timestamp", 0);
+         cm.Add("messageId", RandomUID());
+         cm.Add("body", new TypedObject(null));
+         cm.Add("destination", "");
+         Dictionary<string, object> headers = new Dictionary<string, object>();
+         headers.Add("DSMessagingVersion", 1.0);
+         headers.Add("DSId", "my-rtmps");
+         cm.Add("headers", headers);
+         cm.Add("clientId", null);
+         cm.Add("timeToLive", 0);
 
-            var ret = new byte[result.Count];
-            for (var i = 0; i < ret.Length; i++)
-                ret[i] = result[i];
+         // Write CommandMessage
+         result.Add((byte)0x11); // AMF3 object
+         Encode(result, cm);
 
-            ret = AddHeaders(ret);
-            ret[7] = 0x14; // Change message type
+         byte[] ret = new byte[result.Count];
+         for (int i = 0; i < ret.Length; i++)
+            ret[i] = result[i];
 
-            return ret;
-        }
+         ret = AddHeaders(ret);
+         ret[7] = (byte)0x14; // Change message type
 
-        public byte[] EncodeInvoke(int id, object data)
-        {
-            var result = new List<Byte>();
+         return ret;
+      }
 
-            result.Add(0x00); // version
-            result.Add(0x05); // type?
-            WriteIntAmf0(result, id); // invoke ID
-            result.Add(0x05); // ???
+      public byte[] EncodeInvoke(int id, object data)
+      {
+         List<Byte> result = new List<Byte>();
 
-            result.Add(0x11); // AMF3 object
-            Encode(result, data);
+         result.Add((byte)0x00); // version
+         result.Add((byte)0x05); // type?
+         WriteIntAMF0(result, id); // invoke ID
+         result.Add((byte)0x05); // ???
 
-            var ret = new byte[result.Count];
-            for (var i = 0; i < ret.Length; i++)
-                ret[i] = result[i];
+         result.Add((byte)0x11); // AMF3 object
+         Encode(result, data);
 
-            ret = AddHeaders(ret);
+         byte[] ret = new byte[result.Count];
+         for (int i = 0; i < ret.Length; i++)
+            ret[i] = result[i];
 
-            return ret;
-        }
+         ret = AddHeaders(ret);
 
-        public byte[] Encode(object obj)
-        {
-            var result = new List<byte>();
-            Encode(result, obj);
+         return ret;
+      }
 
-            var ret = new byte[result.Count];
-            for (var i = 0; i < ret.Length; i++)
-                ret[i] = result[i];
+      public byte[] Encode(object obj)
+      {
+         List<byte> result = new List<byte>();
+         Encode(result, obj);
 
-            return ret;
-        }
+         byte[] ret = new byte[result.Count];
+         for (int i = 0; i < ret.Length; i++)
+            ret[i] = result[i];
 
-        public void Encode(List<byte> ret, object obj)
-        {
-            if (obj == null)
-            {
-                ret.Add(0x01);
-            }
-            else if (obj is bool)
-            {
-                var val = (bool) obj;
-                if (val)
-                    ret.Add(0x03);
-                else
-                    ret.Add(0x02);
-            }
-            else if (obj is int)
-            {
-                ret.Add(0x04);
-                WriteInt(ret, (int) obj);
-            }
-            else if (obj is double)
-            {
-                ret.Add(0x05);
-                WriteDouble(ret, (double) obj);
-            }
-            else if (obj is string)
-            {
-                ret.Add(0x06);
-                WriteString(ret, (string) obj);
-            }
-            else if (obj is DateTime)
-            {
-                ret.Add(0x08);
-                WriteDate(ret, (DateTime) obj);
-            }
-            // Must precede Object[] check
-            else if (obj is byte[])
-            {
-                ret.Add(0x0C);
-                WriteByteArray(ret, (byte[]) obj);
-            }
-            else if (obj is object[])
-            {
-                ret.Add(0x09);
-                WriteArray(ret, (object[]) obj);
-            }
-            // Must precede Map check
-            else if (obj is TypedObject)
-            {
-                ret.Add(0x0A);
-                WriteObject(ret, (TypedObject) obj);
-            }
-            else if (obj is Dictionary<string, object>)
-            {
-                ret.Add(0x09);
-                WriteAssociativeArray(ret, (Dictionary<string, object>) obj);
-            }
+         return ret;
+      }
+
+      public void Encode(List<byte> ret, object obj)
+      {
+         if (obj == null)
+         {
+            ret.Add((byte)0x01);
+         }
+         else if (obj is bool)
+         {
+            bool val = (bool)obj;
+            if (val)
+               ret.Add((byte)0x03);
             else
+               ret.Add((byte)0x02);
+         }
+         else if (obj is int)
+         {
+            ret.Add((byte)0x04);
+            WriteInt(ret, (int)obj);
+         }
+         else if (obj is double)
+         {
+            ret.Add((byte)0x05);
+            WriteDouble(ret, (double)obj);
+         }
+         else if (obj is string)
+         {
+            ret.Add((byte)0x06);
+            WriteString(ret, (string)obj);
+         }
+         else if (obj is DateTime)
+         {
+            ret.Add((byte)0x08);
+            WriteDate(ret, (DateTime)obj);
+         }
+         // Must precede Object[] check
+         else if (obj is byte[])
+         {
+            ret.Add((byte)0x0C);
+            WriteByteArray(ret, (byte[])obj);
+         }
+         else if (obj is object[])
+         {
+            ret.Add((byte)0x09);
+            WriteArray(ret, (object[])obj);
+         }
+         // Must precede Map check
+         else if (obj is TypedObject)
+         {
+            ret.Add((byte)0x0A);
+            WriteObject(ret, (TypedObject)obj);
+         }
+         else if (obj is Dictionary<string, object>)
+         {
+            ret.Add((byte)0x09);
+            WriteAssociativeArray(ret, (Dictionary<string, object>)obj);
+         }
+         else
+         {
+            throw new Exception("Unexpected object type: " + obj.GetType().FullName);
+         }
+      }
+
+      private void WriteInt(List<Byte> ret, int val)
+      {
+         if (val < 0 || val >= 0x200000)
+         {
+            ret.Add((byte)(((val >> 22) & 0x7f) | 0x80));
+            ret.Add((byte)(((val >> 15) & 0x7f) | 0x80));
+            ret.Add((byte)(((val >> 8) & 0x7f) | 0x80));
+            ret.Add((byte)(val & 0xff));
+         }
+         else
+         {
+            if (val >= 0x4000)
             {
-                throw new Exception("Unexpected object type: " + obj.GetType().FullName);
+               ret.Add((byte)(((val >> 14) & 0x7f) | 0x80));
             }
-        }
-
-        private void WriteInt(List<Byte> ret, int val)
-        {
-            if (val < 0 || val >= 0x200000)
+            if (val >= 0x80)
             {
-                ret.Add((byte) (((val >> 22) & 0x7f) | 0x80));
-                ret.Add((byte) (((val >> 15) & 0x7f) | 0x80));
-                ret.Add((byte) (((val >> 8) & 0x7f) | 0x80));
-                ret.Add((byte) (val & 0xff));
+               ret.Add((byte)(((val >> 7) & 0x7f) | 0x80));
             }
-            else
+            ret.Add((byte)(val & 0x7f));
+         }
+      }
+
+      private void WriteDouble(List<byte> ret, double val)
+      {
+         if (Double.IsNaN(val))
+         {
+            ret.Add((byte)0x7F);
+            ret.Add((byte)0xFF);
+            ret.Add((byte)0xFF);
+            ret.Add((byte)0xFF);
+            ret.Add((byte)0xE0);
+            ret.Add((byte)0x00);
+            ret.Add((byte)0x00);
+            ret.Add((byte)0x00);
+         }
+         else
+         {
+            byte[] temp = BitConverter.GetBytes((double)val);
+
+            for (int i = temp.Length - 1; i >= 0; i--)
+               ret.Add(temp[i]);
+         }
+      }
+
+      private void WriteString(List<byte> ret, string val)
+      {
+         byte[] temp = null;
+         try
+         {
+            System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
+            temp = encoding.GetBytes(val);
+         }
+         catch (Exception e)
+         {
+            throw new Exception("Unable to encode string as UTF-8: " + val + '\n' + e.Message);
+         }
+
+         WriteInt(ret, (temp.Length << 1) | 1);
+
+         foreach (byte b in temp)
+            ret.Add(b);
+      }
+
+      private void WriteDate(List<Byte> ret, DateTime val)
+      {
+         ret.Add((byte)0x01);
+         WriteDouble(ret, (double)val.TimeOfDay.TotalMilliseconds);
+      }
+
+      private void WriteArray(List<byte> ret, object[] val)
+      {
+         WriteInt(ret, (val.Length << 1) | 1);
+         ret.Add((byte)0x01);
+         foreach (object obj in val)
+            Encode(ret, obj);
+      }
+
+      private void WriteAssociativeArray(List<Byte> ret, Dictionary<string, object> val)
+      {
+         ret.Add((byte)0x01);
+         foreach (string key in val.Keys)
+         {
+            WriteString(ret, key);
+            Encode(ret, val[key]);
+         }
+         ret.Add((byte)0x01);
+      }
+
+      private void WriteObject(List<byte> ret, TypedObject val)
+      {
+         if (val.type == null || val.type.Equals(""))
+         {
+            ret.Add((byte)0x0B); // Dynamic class
+
+            ret.Add((byte)0x01); // No class name
+            foreach (string key in val.Keys)
             {
-                if (val >= 0x4000)
-                {
-                    ret.Add((byte) (((val >> 14) & 0x7f) | 0x80));
-                }
-                if (val >= 0x80)
-                {
-                    ret.Add((byte) (((val >> 7) & 0x7f) | 0x80));
-                }
-                ret.Add((byte) (val & 0x7f));
+               WriteString(ret, key);
+               Encode(ret, val[key]);
             }
-        }
+            ret.Add((byte)0x01); // End of dynamic
+         }
+         else if (val.type.Equals("flex.messaging.io.ArrayCollection"))
+         {
+            ret.Add((byte)0x07); // Externalizable
+            WriteString(ret, val.type);
 
-        private void WriteDouble(List<byte> ret, double val)
-        {
-            if (Double.IsNaN(val))
+            Encode(ret, val["array"]);
+         }
+         else
+         {
+            WriteInt(ret, (val.Count << 4) | 3); // Inline + member count
+            WriteString(ret, val.type);
+
+            List<String> keyOrder = new List<String>();
+            foreach (string key in val.Keys)
             {
-                ret.Add(0x7F);
-                ret.Add(0xFF);
-                ret.Add(0xFF);
-                ret.Add(0xFF);
-                ret.Add(0xE0);
-                ret.Add(0x00);
-                ret.Add(0x00);
-                ret.Add(0x00);
-            }
-            else
-            {
-                var temp = BitConverter.GetBytes(val);
-
-                for (var i = temp.Length - 1; i >= 0; i--)
-                    ret.Add(temp[i]);
-            }
-        }
-
-        private void WriteString(List<byte> ret, string val)
-        {
-            byte[] temp = null;
-            try
-            {
-                var encoding = new UTF8Encoding();
-                temp = encoding.GetBytes(val);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Unable to encode string as UTF-8: " + val + '\n' + e.Message);
+               WriteString(ret, key);
+               keyOrder.Add(key);
             }
 
-            WriteInt(ret, (temp.Length << 1) | 1);
+            foreach (string key in keyOrder)
+               Encode(ret, val[key]);
+         }
+      }
 
-            foreach (var b in temp)
-                ret.Add(b);
-        }
+      private void WriteByteArray(List<byte> ret, byte[] val)
+      {
+         throw new NotImplementedException("Encoding byte arrays is not implemented");
+      }
 
-        private void WriteDate(List<Byte> ret, DateTime val)
-        {
-            ret.Add(0x01);
-            WriteDouble(ret, val.TimeOfDay.TotalMilliseconds);
-        }
+      private void WriteIntAMF0(List<byte> ret, int val)
+      {
+         ret.Add((byte)0x00);
 
-        private void WriteArray(List<byte> ret, object[] val)
-        {
-            WriteInt(ret, (val.Length << 1) | 1);
-            ret.Add(0x01);
-            foreach (var obj in val)
-                Encode(ret, obj);
-        }
+         byte[] temp = BitConverter.GetBytes((double)val);
 
-        private void WriteAssociativeArray(List<Byte> ret, Dictionary<string, object> val)
-        {
-            ret.Add(0x01);
-            foreach (var key in val.Keys)
-            {
-                WriteString(ret, key);
-                Encode(ret, val[key]);
-            }
-            ret.Add(0x01);
-        }
-
-        private void WriteObject(List<byte> ret, TypedObject val)
-        {
-            if (val.Type == null || val.Type.Equals(""))
-            {
-                ret.Add(0x0B); // Dynamic class
-
-                ret.Add(0x01); // No class name
-                foreach (var key in val.Keys)
-                {
-                    WriteString(ret, key);
-                    Encode(ret, val[key]);
-                }
-                ret.Add(0x01); // End of dynamic
-            }
-            else if (val.Type.Equals("flex.messaging.io.ArrayCollection"))
-            {
-                ret.Add(0x07); // Externalizable
-                WriteString(ret, val.Type);
-
-                Encode(ret, val["array"]);
-            }
-            else
-            {
-                WriteInt(ret, (val.Count << 4) | 3); // Inline + member count
-                WriteString(ret, val.Type);
-
-                var keyOrder = new List<String>();
-                foreach (var key in val.Keys)
-                {
-                    WriteString(ret, key);
-                    keyOrder.Add(key);
-                }
-
-                foreach (var key in keyOrder)
-                    Encode(ret, val[key]);
-            }
-        }
-
-        private void WriteByteArray(List<byte> ret, byte[] val)
-        {
-            throw new NotImplementedException("Encoding byte arrays is not implemented");
-        }
-
-        private void WriteIntAmf0(List<byte> ret, int val)
-        {
-            ret.Add(0x00);
-
-            var temp = BitConverter.GetBytes((double) val);
-
-            for (var i = temp.Length - 1; i >= 0; i--)
-                ret.Add(temp[i]);
-            //foreach (byte b in temp)
+         for (int i = temp.Length - 1; i >= 0; i--)
+            ret.Add(temp[i]);
+         //foreach (byte b in temp)
             //ret.Add(b);
-        }
+      }
 
-        private void WriteStringAmf0(List<byte> ret, string val)
-        {
-            byte[] temp = null;
-            try
-            {
-                var encoding = new UTF8Encoding();
-                temp = encoding.GetBytes(val);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Unable to encode string as UTF-8: " + val + '\n' + e.Message);
-            }
+      private void WriteStringAMF0(List<byte> ret, string val)
+      {
+         byte[] temp = null;
+         try
+         {
+            System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
+            temp = encoding.GetBytes(val);
+         }
+         catch (Exception e)
+         {
+            throw new Exception("Unable to encode string as UTF-8: " + val + '\n' + e.Message);
+         }
 
-            ret.Add(0x02);
+         ret.Add((byte)0x02);
 
-            ret.Add((byte) ((temp.Length & 0xFF00) >> 8));
-            ret.Add((byte) (temp.Length & 0x00FF));
+         ret.Add((byte)((temp.Length & 0xFF00) >> 8));
+         ret.Add((byte)(temp.Length & 0x00FF));
 
-            foreach (var b in temp)
-                ret.Add(b);
-        }
+         foreach (byte b in temp)
+            ret.Add(b);
+      }
 
-        public static string RandomUid()
-        {
-            var rand = new Random();
+      public static string RandomUID()
+      {
+         Random rand = new Random();
 
-            var bytes = new byte[16];
-            rand.NextBytes(bytes);
+         byte[] bytes = new byte[16];
+         rand.NextBytes(bytes);
 
-            var ret = new StringBuilder();
-            for (var i = 0; i < bytes.Length; i++)
-            {
-                if (i == 4 || i == 6 || i == 8 || i == 10)
-                    ret.Append('-');
-                ret.AppendFormat("{0:X2}", bytes[i]);
-            }
+         StringBuilder ret = new StringBuilder();
+         for (int i = 0; i < bytes.Length; i++)
+         {
+            if (i == 4 || i == 6 || i == 8 || i == 10)
+               ret.Append('-');
+            ret.AppendFormat("{0:X2}", bytes[i]);
+         }
 
-            return ret.ToString();
-        }
-    }
+         return ret.ToString();
+      }
+
+   }
 }

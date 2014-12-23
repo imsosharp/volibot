@@ -1,17 +1,22 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Matchmaking
 {
+
     public class MatchMakerParams : RiotGamesObject
     {
-        public delegate void Callback(MatchMakerParams result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.matchmaking.MatchMakerParams";
+        private string type = "com.riotgames.platform.matchmaking.MatchMakerParams";
 
         public MatchMakerParams()
         {
@@ -19,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Matchmaking
 
         public MatchMakerParams(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public MatchMakerParams(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(MatchMakerParams result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("lastMaestroMessage")]
@@ -53,10 +63,5 @@ namespace LoLLauncher.RiotObjects.Platform.Matchmaking
         [InternalName("invitationId")]
         public object InvitationId { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

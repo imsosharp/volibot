@@ -1,18 +1,22 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Statistics
 {
+
     public class AggregatedStats : RiotGamesObject
     {
-        public delegate void Callback(AggregatedStats result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.statistics.AggregatedStats";
+        private string type = "com.riotgames.platform.statistics.AggregatedStats";
 
         public AggregatedStats()
         {
@@ -20,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
 
         public AggregatedStats(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public AggregatedStats(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(AggregatedStats result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("lifetimeStatistics")]
@@ -45,10 +54,5 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         [InternalName("aggregatedStatsJson")]
         public String AggregatedStatsJson { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

@@ -1,35 +1,45 @@
-#region
-
 using System;
-
-#endregion
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Game
 {
-    public class PlayerChampionSelectionDto : RiotGamesObject
+
+    public class PlayerChampionSelectionDTO : RiotGamesObject
     {
-        public delegate void Callback(PlayerChampionSelectionDto result);
-
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.game.PlayerChampionSelectionDTO";
-
-        public PlayerChampionSelectionDto()
-        {
-        }
-
-        public PlayerChampionSelectionDto(Callback callback)
-        {
-            this._callback = callback;
-        }
-
-        public PlayerChampionSelectionDto(TypedObject result)
-        {
-            SetFields(this, result);
-        }
-
         public override string TypeName
         {
-            get { return _type; }
+            get
+            {
+                return this.type;
+            }
+        }
+
+        private string type = "com.riotgames.platform.game.PlayerChampionSelectionDTO";
+
+        public PlayerChampionSelectionDTO()
+        {
+        }
+
+        public PlayerChampionSelectionDTO(Callback callback)
+        {
+            this.callback = callback;
+        }
+
+        public PlayerChampionSelectionDTO(TypedObject result)
+        {
+            base.SetFields(this, result);
+        }
+
+        public delegate void Callback(PlayerChampionSelectionDTO result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
+        {
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("summonerInternalName")]
@@ -47,10 +57,5 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         [InternalName("spell1Id")]
         public Double Spell1Id { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }

@@ -1,26 +1,25 @@
-﻿#region
-
-using LoLLauncher;
+﻿using LoLLauncher;
 using LoLLauncher.RiotObjects;
-
-#endregion
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace PVPNetConnect.RiotObjects
 {
     public class SummonerNames : RiotGamesObject
     {
-        public delegate void Callback(object[] result);
-
-        private readonly Callback _callback;
-
         public SummonerNames(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
+
+        public delegate void Callback(object[] result);
+        private Callback callback;
 
         public override void DoCallback(TypedObject result)
         {
-            _callback(result.GetArray("array"));
+            callback(result.GetArray("array"));
         }
     }
 }

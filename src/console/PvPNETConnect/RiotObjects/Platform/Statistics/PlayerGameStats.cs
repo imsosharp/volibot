@@ -1,18 +1,22 @@
-#region
-
 using System;
 using System.Collections.Generic;
-
-#endregion
+using System.Linq;
+using System.Text;
 
 namespace LoLLauncher.RiotObjects.Platform.Statistics
 {
+
     public class PlayerGameStats : RiotGamesObject
     {
-        public delegate void Callback(PlayerGameStats result);
+        public override string TypeName
+        {
+            get
+            {
+                return this.type;
+            }
+        }
 
-        private readonly Callback _callback;
-        private readonly string _type = "com.riotgames.platform.statistics.PlayerGameStats";
+        private string type = "com.riotgames.platform.statistics.PlayerGameStats";
 
         public PlayerGameStats()
         {
@@ -20,17 +24,22 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
 
         public PlayerGameStats(Callback callback)
         {
-            this._callback = callback;
+            this.callback = callback;
         }
 
         public PlayerGameStats(TypedObject result)
         {
-            SetFields(this, result);
+            base.SetFields(this, result);
         }
 
-        public override string TypeName
+        public delegate void Callback(PlayerGameStats result);
+
+        private Callback callback;
+
+        public override void DoCallback(TypedObject result)
         {
-            get { return _type; }
+            base.SetFields(this, result);
+            callback(this);
         }
 
         [InternalName("skinName")]
@@ -159,10 +168,5 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         [InternalName("championId")]
         public Double ChampionId { get; set; }
 
-        public override void DoCallback(TypedObject result)
-        {
-            SetFields(this, result);
-            _callback(this);
-        }
     }
 }
