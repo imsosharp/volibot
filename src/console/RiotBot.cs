@@ -385,6 +385,13 @@ namespace RitoBot
        
         private void updateStatus(string status, string accname)
         {
+            if (Program.LoadGUI) Program.MainWindow.Print(string.Concat(new object[4]
+              {     
+                (object) "[",
+                (object) accname,
+                (object) "]: ",
+                (object) status
+              }));
             Console.WriteLine(string.Concat(new object[7]
               {
                 (object) "[",

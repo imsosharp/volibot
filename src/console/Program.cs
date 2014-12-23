@@ -34,11 +34,14 @@ namespace RitoBot
         public static bool rndSpell = true;
         public static string spell1 = "flash";
         public static string spell2 = "ignite";
-        public static string cversion = "";
+        public static string cversion = "4.21.14_12_08_11_36";
         public static bool AutoUpdate = false;
+        public static bool LoadGUI = true;
+        public static frm_MainWindow MainWindow = new frm_MainWindow();
 
         static void Main(string[] args)
         {
+            InitChecks();
             loadVersion();
             Console.Title = "Volibot";
             Console.ForegroundColor = ConsoleColor.Green;
@@ -69,6 +72,7 @@ namespace RitoBot
             Console.WriteLine(getTimestamp() + "Loading config\\accounts.txt");
             loadAccounts();
             int curRunning = 0;
+            if (LoadGUI) MainWindow.ShowDialog();
             foreach (string acc in accounts)
             {
                 try
@@ -102,8 +106,9 @@ namespace RitoBot
         }
         public static void loadVersion()
         {
-            var versiontxt = File.OpenText(AppDomain.CurrentDomain.BaseDirectory + "config\\version.txt");
-            cversion = versiontxt.ReadLine();
+
+            var versiontxt = File.OpenText(AppDomain.CurrentDomain.BaseDirectory + @"config\\version.txt");
+            cversion = versiontxt.ReadLine();               
         }
         public static void lognNewAccount()
         {
@@ -140,6 +145,7 @@ namespace RitoBot
                 IniFile iniFile = new IniFile(AppDomain.CurrentDomain.BaseDirectory + "config\\settings.ini");
                 //General
                 Path2 = iniFile.IniReadValue("General", "LauncherPath");
+                LoadGUI = Convert.ToBoolean(iniFile.IniReadValue("General", "LoadGUI"));
                 maxBots = Convert.ToInt32(iniFile.IniReadValue("General", "MaxBots"));
                 maxLevel = Convert.ToInt32(iniFile.IniReadValue("General", "MaxLevel"));
                 championId = iniFile.IniReadValue("General", "ChampionPick").ToUpper();
@@ -161,7 +167,8 @@ namespace RitoBot
         }
         public static void loadAccounts()
         {
-            TextReader tr = File.OpenText(AppDomain.CurrentDomain.BaseDirectory + "config\\accounts.txt");
+            var accountsTxtPath = AppDomain.CurrentDomain.BaseDirectory + "config\\accounts.txt";
+            TextReader tr = File.OpenText(accountsTxtPath);
             string line;
             while ((line = tr.ReadLine()) != null)
             {
@@ -178,7 +185,7 @@ namespace RitoBot
         {
            Console.ForegroundColor = color;
         }
-        private static void gamecfg()
+        public static void gamecfg()
         {
             try
             {
@@ -214,6 +221,43 @@ namespace RitoBot
             }
 
             return builder.ToString();
+        }
+        private static void InitChecks()
+        {
+            var theFolder = AppDomain.CurrentDomain.BaseDirectory + @"config\\";
+            var accountsTxtLocation = AppDomain.CurrentDomain.BaseDirectory + @"config\\accounts.txt";
+            var configTxtLocation = AppDomain.CurrentDomain.BaseDirectory + @"config\\settings.ini";
+            var versionTxtLocation = AppDomain.CurrentDomain.BaseDirectory + @"config\\version.txt";
+
+            if (!Directory.Exists(theFolder))
+            {
+                Directory.CreateDirectory(theFolder);
+            }
+
+            if (!File.Exists(configTxtLocation))
+            {
+                
+                var newfile = File.Create(configTxtLocation);
+                newfile.Close();
+                var content = "[General]\nLauncherPath=C:\\Riot Games\\League of Legends\\\nLoadGUI=true\nMaxBots=1\nMaxLevel=31\nChampionPick=Annie\nSpell1=Flash\nSpell2=Exhaust\nRndSpell=false\nReplaceConfig=false\nAutoUpdate=false\n\n[Account]\nRegion=EUW\nBuyBoost=false";
+                var separator = new string[] { "\n" };
+                string[] contentlines = content.Split(separator,StringSplitOptions.None);
+                File.WriteAllLines(configTxtLocation, contentlines);
+            }
+            if (!File.Exists(versionTxtLocation))
+            {
+                var newfile = File.CreateText(versionTxtLocation);
+                newfile.Close();
+                string[] content = { cversion };
+                File.WriteAllLines(versionTxtLocation, content);
+            }
+            if (!File.Exists(accountsTxtLocation))
+            {
+                var newfile = File.CreateText(accountsTxtLocation);
+                newfile.Close();
+                string[] content = { "username|password|QueueType" };
+                File.WriteAllLines(accountsTxtLocation, content);
+            }
         }
    }
 }
