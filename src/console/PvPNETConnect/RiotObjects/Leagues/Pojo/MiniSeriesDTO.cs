@@ -1,45 +1,35 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Leagues.Pojo
 {
-
-    public class MiniSeriesDTO : RiotGamesObject
+    public class MiniSeriesDto : RiotGamesObject
     {
+        public delegate void Callback(MiniSeriesDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.leagues.pojo.MiniSeriesDTO";
+
+        public MiniSeriesDto()
+        {
+        }
+
+        public MiniSeriesDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public MiniSeriesDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.leagues.pojo.MiniSeriesDTO";
-
-        public MiniSeriesDTO()
-        {
-        }
-
-        public MiniSeriesDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public MiniSeriesDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(MiniSeriesDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("progress")]
@@ -57,5 +47,10 @@ namespace LoLLauncher.RiotObjects.Leagues.Pojo
         [InternalName("wins")]
         public Int32 Wins { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

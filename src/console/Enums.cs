@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RitoBot
+﻿namespace RitoBot
 {
-    class Enums
+    internal class Enums
     {
-
-        public static int championToId(string name)
+        public static int ChampionToId(string name)
         {
             switch (name)
             {
@@ -93,8 +86,8 @@ namespace RitoBot
                     return 126;
                 case "JINX":
                     return 222;
-				case "KALISTA":
-					return 429;
+                case "KALISTA":
+                    return 429;
                 case "KARMA":
                     return 43;
                 case "KARTHUS":
@@ -161,8 +154,8 @@ namespace RitoBot
                     return 78;
                 case "QUINN":
                     return 133;
-				case "REKSAI":
-					return 421;
+                case "REKSAI":
+                    return 421;
                 case "RAMMUS":
                     return 33;
                 case "RENEKTON":
@@ -264,7 +257,7 @@ namespace RitoBot
             }
         }
 
-        public static int spellToId(string name)
+        public static int SpellToId(string name)
         {
             switch (name)
             {

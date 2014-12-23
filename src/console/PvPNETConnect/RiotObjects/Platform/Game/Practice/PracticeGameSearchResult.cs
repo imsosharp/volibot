@@ -1,23 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LoLLauncher.RiotObjects.Platform.Game;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Game.Practice
 {
-
     public class PracticeGameSearchResult : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(PracticeGameSearchResult result);
 
-        private string type = "com.riotgames.platform.game.practice.PracticeGameSearchResult";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.game.practice.PracticeGameSearchResult";
 
         public PracticeGameSearchResult()
         {
@@ -25,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Game.Practice
 
         public PracticeGameSearchResult(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public PracticeGameSearchResult(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(PracticeGameSearchResult result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("spectatorCount")]
@@ -90,5 +79,11 @@ namespace LoLLauncher.RiotObjects.Platform.Game.Practice
 
         [InternalName("team2Count")]
         public Int32 Team2Count { get; set; }
+
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

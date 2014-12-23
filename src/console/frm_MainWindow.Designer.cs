@@ -1,6 +1,6 @@
 namespace RitoBot
 {
-    partial class frm_MainWindow
+    partial class FrmMainWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@ namespace RitoBot
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_MainWindow));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMainWindow));
             this.mainWindowSplitContainer = new System.Windows.Forms.SplitContainer();
             this.configTabControl = new System.Windows.Forms.TabControl();
             this.accountsTab = new System.Windows.Forms.TabPage();

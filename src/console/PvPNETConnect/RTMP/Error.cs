@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace LoLLauncher
+﻿namespace LoLLauncher
 {
     public enum ErrorType
     {
@@ -16,10 +11,11 @@ namespace LoLLauncher
         Receive,
         General
     }
+
     public class Error
     {
-        public ErrorType Type;
-        public string Message = "";
         public string ErrorCode = "";
+        public string Message = "";
+        public ErrorType Type;
     }
 }

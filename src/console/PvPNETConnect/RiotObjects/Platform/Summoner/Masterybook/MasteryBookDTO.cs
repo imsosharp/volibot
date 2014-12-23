@@ -1,52 +1,43 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner.Masterybook
 {
-
-    public class MasteryBookDTO : RiotGamesObject
+    public class MasteryBookDto : RiotGamesObject
     {
+        public delegate void Callback(MasteryBookDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.summoner.masterybook.MasteryBookDTO";
+
+        public MasteryBookDto()
+        {
+        }
+
+        public MasteryBookDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public MasteryBookDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.summoner.masterybook.MasteryBookDTO";
-
-        public MasteryBookDTO()
-        {
-        }
-
-        public MasteryBookDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public MasteryBookDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(MasteryBookDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("bookPagesJson")]
         public object BookPagesJson { get; set; }
 
         [InternalName("bookPages")]
-        public List<MasteryBookPageDTO> BookPages { get; set; }
+        public List<MasteryBookPageDto> BookPages { get; set; }
 
         [InternalName("dateString")]
         public String DateString { get; set; }
@@ -54,5 +45,10 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner.Masterybook
         [InternalName("summonerId")]
         public Double SummonerId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

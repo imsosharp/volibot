@@ -1,50 +1,45 @@
-using System;
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using LoLLauncher.RiotObjects.Leagues.Pojo;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Leagues.Client.Dto
 {
-
-    public class SummonerLeaguesDTO : RiotGamesObject
+    public class SummonerLeaguesDto : RiotGamesObject
     {
+        public delegate void Callback(SummonerLeaguesDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.leagues.client.dto.SummonerLeaguesDTO";
+
+        public SummonerLeaguesDto()
+        {
+        }
+
+        public SummonerLeaguesDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public SummonerLeaguesDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.leagues.client.dto.SummonerLeaguesDTO";
-
-        public SummonerLeaguesDTO()
-        {
-        }
-
-        public SummonerLeaguesDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public SummonerLeaguesDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(SummonerLeaguesDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("summonerLeagues")]
-        public List<LeagueListDTO> SummonerLeagues { get; set; }
+        public List<LeagueListDto> SummonerLeagues { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

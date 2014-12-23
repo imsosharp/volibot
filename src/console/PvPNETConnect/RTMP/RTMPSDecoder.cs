@@ -1,52 +1,53 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.IO;
 using System.Web.Script.Serialization;
+
+#endregion
+
 namespace LoLLauncher
 {
-    public class RTMPSDecoder
+    public class RtmpsDecoder
     {
         // Stores the data to be consumed while decoding
-        private byte[] dataBuffer;
-        private int dataPos;
-
+        private byte[] _dataBuffer;
+        private int _dataPos;
+        private readonly List<ClassDefinition> _classDefinitions = new List<ClassDefinition>();
+        private readonly List<object> _objectReferences = new List<object>();
         // Lists of references and class definitions seen so far
-        private List<string> stringReferences = new List<string>();
-        private List<object> objectReferences = new List<object>();
-        private List<ClassDefinition> classDefinitions = new List<ClassDefinition>();
-
+        private readonly List<string> _stringReferences = new List<string>();
 
         private void Reset()
         {
-            stringReferences.Clear();
-            objectReferences.Clear();
-            classDefinitions.Clear();
+            _stringReferences.Clear();
+            _objectReferences.Clear();
+            _classDefinitions.Clear();
         }
 
         public TypedObject DecodeConnect(byte[] data)
         {
             Reset();
 
-            dataBuffer = data;
-            dataPos = 0;
+            _dataBuffer = data;
+            _dataPos = 0;
 
-            TypedObject result = new TypedObject("Invoke");
-            result.Add("result", DecodeAMF0());
-            result.Add("invokeId", DecodeAMF0());
-            result.Add("serviceCall", DecodeAMF0());
-            result.Add("data", DecodeAMF0());
-            if (dataPos != dataBuffer.Length)
+            var result = new TypedObject("Invoke");
+            result.Add("result", DecodeAmf0());
+            result.Add("invokeId", DecodeAmf0());
+            result.Add("serviceCall", DecodeAmf0());
+            result.Add("data", DecodeAmf0());
+            if (_dataPos != _dataBuffer.Length)
             {
-                for (int i = dataPos; i < data.Length; i++)
+                for (var i = _dataPos; i < data.Length; i++)
                 {
                     if (ReadByte() != '\0')
                         throw new Exception("There is other data in the buffer!");
                 }
             }
-            if (dataPos != dataBuffer.Length)
-                throw new Exception("Did not consume entire buffer: " + dataPos + " of " + dataBuffer.Length);
+            if (_dataPos != _dataBuffer.Length)
+                throw new Exception("Did not consume entire buffer: " + _dataPos + " of " + _dataBuffer.Length);
 
             return result;
         }
@@ -55,43 +56,43 @@ namespace LoLLauncher
         {
             Reset();
 
-            dataBuffer = data;
-            dataPos = 0;
+            _dataBuffer = data;
+            _dataPos = 0;
 
-            TypedObject result = new TypedObject("Invoke");
-            if (dataBuffer[0] == 0x00)
+            var result = new TypedObject("Invoke");
+            if (_dataBuffer[0] == 0x00)
             {
-                dataPos++;
+                _dataPos++;
                 result.Add("version", 0x00);
             }
-            result.Add("result", DecodeAMF0());
-            result.Add("invokeId", DecodeAMF0());
-            result.Add("serviceCall", DecodeAMF0());
-            result.Add("data", DecodeAMF0());
+            result.Add("result", DecodeAmf0());
+            result.Add("invokeId", DecodeAmf0());
+            result.Add("serviceCall", DecodeAmf0());
+            result.Add("data", DecodeAmf0());
 
 
-            if (dataPos != dataBuffer.Length)
-                throw new Exception("Did not consume entire buffer: " + dataPos + " of " + dataBuffer.Length);
+            if (_dataPos != _dataBuffer.Length)
+                throw new Exception("Did not consume entire buffer: " + _dataPos + " of " + _dataBuffer.Length);
 
             return result;
         }
 
         public object Decode(byte[] data)
         {
-            dataBuffer = data;
-            dataPos = 0;
+            _dataBuffer = data;
+            _dataPos = 0;
 
-            object result = Decode();
+            var result = Decode();
 
-            if (dataPos != dataBuffer.Length)
-                throw new Exception("Did not consume entire buffer: " + dataPos + " of " + dataBuffer.Length);
+            if (_dataPos != _dataBuffer.Length)
+                throw new Exception("Did not consume entire buffer: " + _dataPos + " of " + _dataBuffer.Length);
 
             return result;
         }
 
         private object Decode()
         {
-            byte type = ReadByte();
+            var type = ReadByte();
             switch (type)
             {
                 case 0x00:
@@ -116,7 +117,7 @@ namespace LoLLauncher
                     return ReadString();
 
                 case 0x07:
-                    return ReadXML();
+                    return ReadXml();
 
                 case 0x08:
                     return ReadDate();
@@ -128,7 +129,7 @@ namespace LoLLauncher
                     return ReadObject();
 
                 case 0x0B:
-                    return ReadXMLString();
+                    return ReadXmlString();
 
                 case 0x0C:
                     return ReadByteArray();
@@ -139,8 +140,8 @@ namespace LoLLauncher
 
         private byte ReadByte()
         {
-            byte ret = dataBuffer[dataPos];
-            dataPos++;
+            var ret = _dataBuffer[_dataPos];
+            _dataPos++;
             return ret;
         }
 
@@ -154,27 +155,33 @@ namespace LoLLauncher
 
         private byte[] ReadBytes(int length)
         {
-            byte[] ret = new byte[length];
-            for (int i = 0; i < length; i++)
+            var ret = new byte[length];
+            for (var i = 0; i < length; i++)
             {
-                ret[i] = dataBuffer[dataPos];
-                dataPos++;
+                ret[i] = _dataBuffer[_dataPos];
+                _dataPos++;
             }
             return ret;
         }
 
         private int ReadInt()
         {
-            int ret = ReadByteAsInt();
+            var ret = ReadByteAsInt();
             int tmp;
 
             if (ret < 128)
             {
                 return ret;
             }
+            ret = (ret & 0x7f) << 7;
+            tmp = ReadByteAsInt();
+            if (tmp < 128)
+            {
+                ret = ret | tmp;
+            }
             else
             {
-                ret = (ret & 0x7f) << 7;
+                ret = (ret | tmp & 0x7f) << 7;
                 tmp = ReadByteAsInt();
                 if (tmp < 128)
                 {
@@ -182,31 +189,22 @@ namespace LoLLauncher
                 }
                 else
                 {
-                    ret = (ret | tmp & 0x7f) << 7;
+                    ret = (ret | tmp & 0x7f) << 8;
                     tmp = ReadByteAsInt();
-                    if (tmp < 128)
-                    {
-                        ret = ret | tmp;
-                    }
-                    else
-                    {
-                        ret = (ret | tmp & 0x7f) << 8;
-                        tmp = ReadByteAsInt();
-                        ret = ret | tmp;
-                    }
+                    ret = ret | tmp;
                 }
             }
 
             // Sign extend
-            int mask = 1 << 28;
-            int r = -(ret & mask) | ret;
+            var mask = 1 << 28;
+            var r = -(ret & mask) | ret;
             return r;
         }
 
         private double ReadDouble()
         {
             long value = 0;
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
                 value = (value << 8) + ReadByteAsInt();
 
             return BitConverter.Int64BitsToDouble(value);
@@ -214,8 +212,8 @@ namespace LoLLauncher
 
         private string ReadString()
         {
-            int handle = ReadInt();
-            bool inline = ((handle & 1) != 0);
+            var handle = ReadInt();
+            var inline = ((handle & 1) != 0);
             handle = handle >> 1;
 
             if (inline)
@@ -223,12 +221,12 @@ namespace LoLLauncher
                 if (handle == 0)
                     return "";
 
-                byte[] data = ReadBytes(handle);
+                var data = ReadBytes(handle);
 
                 string str;
                 try
                 {
-                    System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
+                    var enc = new UTF8Encoding();
                     str = enc.GetString(data);
                 }
                 catch (Exception e)
@@ -236,181 +234,170 @@ namespace LoLLauncher
                     throw new Exception("Error parsing AMF3 string from " + data + '\n' + e.Message);
                 }
 
-                stringReferences.Add(str);
+                _stringReferences.Add(str);
 
                 return str;
             }
-            else
-            {
-                return stringReferences[handle];
-            }
+            return _stringReferences[handle];
         }
 
-        private string ReadXML()
+        private string ReadXml()
         {
             throw new NotImplementedException("Reading of XML is not implemented");
         }
 
         private DateTime ReadDate()
         {
-            int handle = ReadInt();
-            bool inline = ((handle & 1) != 0);
+            var handle = ReadInt();
+            var inline = ((handle & 1) != 0);
             handle = handle >> 1;
 
             if (inline)
             {
-                long ms = (long)ReadDouble();
-                DateTime d = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                d = d.AddSeconds(ms / 1000);
+                var ms = (long) ReadDouble();
+                var d = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+                d = d.AddSeconds(ms/1000);
 
-                objectReferences.Add(d);
+                _objectReferences.Add(d);
 
                 return d;
             }
-            else
-            {
-                return DateTime.MinValue;
-            }
+            return DateTime.MinValue;
         }
 
         private object[] ReadArray()
         {
-            int handle = ReadInt();
-            bool inline = ((handle & 1) != 0);
+            var handle = ReadInt();
+            var inline = ((handle & 1) != 0);
             handle = handle >> 1;
 
             if (inline)
             {
-                string key = ReadString();
+                var key = ReadString();
                 if (key != null && !key.Equals(""))
                     throw new NotImplementedException("Associative arrays are not supported");
 
-                object[] ret = new object[handle];
-                objectReferences.Add(ret);
+                var ret = new object[handle];
+                _objectReferences.Add(ret);
 
-                for (int i = 0; i < handle; i++)
+                for (var i = 0; i < handle; i++)
                     ret[i] = Decode();
 
                 return ret;
             }
-            else
-            {
-                return (object[])objectReferences[handle];
-            }
+            return (object[]) _objectReferences[handle];
         }
 
         private List<object> ReadList()
         {
-            int handle = ReadInt();
-            bool inline = ((handle & 1) != 0);
+            var handle = ReadInt();
+            var inline = ((handle & 1) != 0);
             handle = handle >> 1;
 
             if (inline)
             {
-                string key = ReadString();
+                var key = ReadString();
                 if (key != null && !key.Equals(""))
                     throw new NotImplementedException("Associative arrays are not supported");
 
-                List<object> ret = new List<object>();
-                objectReferences.Add(ret);
+                var ret = new List<object>();
+                _objectReferences.Add(ret);
 
-                for (int i = 0; i < handle; i++)
+                for (var i = 0; i < handle; i++)
                     ret.Add(Decode());
 
                 return ret;
             }
-            else
-            {
-                return (List<object>)objectReferences[handle];
-            }
+            return (List<object>) _objectReferences[handle];
         }
 
         private object ReadObject()
         {
-            int handle = ReadInt();
-            bool inline = ((handle & 1) != 0);
+            var handle = ReadInt();
+            var inline = ((handle & 1) != 0);
             handle = handle >> 1;
 
             if (inline)
             {
-                bool inlineDefine = ((handle & 1) != 0);
+                var inlineDefine = ((handle & 1) != 0);
                 handle = handle >> 1;
 
                 ClassDefinition cd;
                 if (inlineDefine)
                 {
                     cd = new ClassDefinition();
-                    cd.type = ReadString();
+                    cd.Type = ReadString();
 
-                    cd.externalizable = ((handle & 1) != 0);
+                    cd.Externalizable = ((handle & 1) != 0);
                     handle = handle >> 1;
-                    cd.dynamic = ((handle & 1) != 0);
+                    cd.Dynamic = ((handle & 1) != 0);
                     handle = handle >> 1;
 
-                    for (int i = 0; i < handle; i++)
-                        cd.members.Add(ReadString());
+                    for (var i = 0; i < handle; i++)
+                        cd.Members.Add(ReadString());
 
-                    classDefinitions.Add(cd);
+                    _classDefinitions.Add(cd);
                 }
                 else
                 {
-                    cd = classDefinitions[handle];
+                    cd = _classDefinitions[handle];
                 }
 
-                TypedObject ret = new TypedObject(cd.type);
+                var ret = new TypedObject(cd.Type);
 
                 // Need to add reference here due to circular references
-                objectReferences.Add(ret);
+                _objectReferences.Add(ret);
 
-                if (cd.externalizable)
+                if (cd.Externalizable)
                 {
-                    if (cd.type.Equals("DSK"))
-                        ret = ReadDSK();
-                    else if (cd.type.Equals("DSA"))
-                        ret = ReadDSA();
-                    else if (cd.type.Equals("flex.messaging.io.ArrayCollection"))
+                    if (cd.Type.Equals("DSK"))
+                        ret = ReadDsk();
+                    else if (cd.Type.Equals("DSA"))
+                        ret = ReadDsa();
+                    else if (cd.Type.Equals("flex.messaging.io.ArrayCollection"))
                     {
-                        object obj = Decode();
-                        ret = TypedObject.MakeArrayCollection((object[])obj);
+                        var obj = Decode();
+                        ret = TypedObject.MakeArrayCollection((object[]) obj);
                     }
-                    else if (cd.type.Equals("com.riotgames.platform.systemstate.ClientSystemStatesNotification") || cd.type.Equals("com.riotgames.platform.broadcast.BroadcastNotification"))
+                    else if (cd.Type.Equals("com.riotgames.platform.systemstate.ClientSystemStatesNotification") ||
+                             cd.Type.Equals("com.riotgames.platform.broadcast.BroadcastNotification"))
                     {
-                        int size = 0;
-                        for (int i = 0; i < 4; i++)
-                            size = size * 256 + ReadByteAsInt();
+                        var size = 0;
+                        for (var i = 0; i < 4; i++)
+                            size = size*256 + ReadByteAsInt();
 
-                        byte[] data = ReadBytes(size);
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < data.Length; i++)
+                        var data = ReadBytes(size);
+                        var sb = new StringBuilder();
+                        for (var i = 0; i < data.Length; i++)
                             sb.Append(Convert.ToChar(data[i]));
 
-                        JavaScriptSerializer serializer = new JavaScriptSerializer();
+                        var serializer = new JavaScriptSerializer();
                         ret = serializer.Deserialize<TypedObject>(sb.ToString());
-                        ret.type = cd.type;
+                        ret.Type = cd.Type;
                     }
                     else
                     {
                         //for (int i = dataPos; i < dataBuffer.length; i++)
                         //System.out.print(String.format("%02X", dataBuffer[i]));
                         //System.out.println();
-                        throw new NotImplementedException("Externalizable not handled for " + cd.type);
+                        throw new NotImplementedException("Externalizable not handled for " + cd.Type);
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < cd.members.Count; i++)
+                    for (var i = 0; i < cd.Members.Count; i++)
                     {
-                        String key = cd.members[i];
-                        object value = Decode();
+                        var key = cd.Members[i];
+                        var value = Decode();
                         ret.Add(key, value);
                     }
 
-                    if (cd.dynamic)
+                    if (cd.Dynamic)
                     {
                         String key;
                         while ((key = ReadString()).Length != 0)
                         {
-                            object value = Decode();
+                            var value = Decode();
                             ret.Add(key, value);
                         }
                     }
@@ -418,45 +405,39 @@ namespace LoLLauncher
 
                 return ret;
             }
-            else
-            {
-                return objectReferences[handle];
-            }
+            return _objectReferences[handle];
         }
 
-        private string ReadXMLString()
+        private string ReadXmlString()
         {
             throw new NotImplementedException("Reading of XML strings is not implemented");
         }
 
         private byte[] ReadByteArray()
         {
-            int handle = ReadInt();
-            bool inline = ((handle & 1) != 0);
+            var handle = ReadInt();
+            var inline = ((handle & 1) != 0);
             handle = handle >> 1;
 
             if (inline)
             {
-                byte[] ret = ReadBytes(handle);
-                objectReferences.Add(ret);
+                var ret = ReadBytes(handle);
+                _objectReferences.Add(ret);
                 return ret;
             }
-            else
-            {
-                return (byte[])objectReferences[handle];
-            }
+            return (byte[]) _objectReferences[handle];
         }
 
-        private TypedObject ReadDSA()
+        private TypedObject ReadDsa()
         {
-            TypedObject ret = new TypedObject("DSA");
+            var ret = new TypedObject("DSA");
 
             int flag;
-            List<int> flags = ReadFlags();
-            for (int i = 0; i < flags.Count; i++)
+            var flags = ReadFlags();
+            for (var i = 0; i < flags.Count; i++)
             {
                 flag = flags[i];
-                int bits = 0;
+                var bits = 0;
                 if (i == 0)
                 {
                     if ((flag & 0x01) != 0)
@@ -480,16 +461,16 @@ namespace LoLLauncher
                     if ((flag & 0x01) != 0)
                     {
                         ReadByte();
-                        byte[] temp = ReadByteArray();
+                        var temp = ReadByteArray();
                         ret.Add("clientIdBytes", temp);
-                        ret.Add("clientId", ByteArrayToID(temp));
+                        ret.Add("clientId", ByteArrayToId(temp));
                     }
                     if ((flag & 0x02) != 0)
                     {
                         ReadByte();
-                        byte[] temp = ReadByteArray();
+                        var temp = ReadByteArray();
                         ret.Add("messageIdBytes", temp);
-                        ret.Add("messageId", ByteArrayToID(temp));
+                        ret.Add("messageId", ByteArrayToId(temp));
                     }
                     bits = 2;
                 }
@@ -498,10 +479,10 @@ namespace LoLLauncher
             }
 
             flags = ReadFlags();
-            for (int i = 0; i < flags.Count; i++)
+            for (var i = 0; i < flags.Count; i++)
             {
                 flag = flags[i];
-                int bits = 0;
+                var bits = 0;
 
                 if (i == 0)
                 {
@@ -510,9 +491,9 @@ namespace LoLLauncher
                     if ((flag & 0x02) != 0)
                     {
                         ReadByte();
-                        byte[] temp = ReadByteArray();
+                        var temp = ReadByteArray();
                         ret.Add("correlationIdBytes", temp);
-                        ret.Add("correlationId", ByteArrayToID(temp));
+                        ret.Add("correlationId", ByteArrayToId(temp));
                     }
                     bits = 2;
                 }
@@ -523,14 +504,14 @@ namespace LoLLauncher
             return ret;
         }
 
-        private TypedObject ReadDSK()
+        private TypedObject ReadDsk()
         {
             // DSK is just a DSA + extra set of flags/objects
-            TypedObject ret = ReadDSA();
-            ret.type = "DSK";
+            var ret = ReadDsa();
+            ret.Type = "DSK";
 
-            List<int> flags = ReadFlags();
-            for (int i = 0; i < flags.Count; i++)
+            var flags = ReadFlags();
+            for (var i = 0; i < flags.Count; i++)
                 ReadRemaining(flags[i], 0);
 
             return ret;
@@ -538,7 +519,7 @@ namespace LoLLauncher
 
         private List<int> ReadFlags()
         {
-            List<int> flags = new List<int>();
+            var flags = new List<int>();
             int flag;
             do
             {
@@ -555,7 +536,7 @@ namespace LoLLauncher
             // preserve the integrity of the input stream...
             if ((flag >> bits) != 0)
             {
-                for (int o = bits; o < 6; o++)
+                for (var o = bits; o < 6; o++)
                 {
                     if (((flag >> o) & 1) != 0)
                         Decode();
@@ -563,10 +544,10 @@ namespace LoLLauncher
             }
         }
 
-        private string ByteArrayToID(byte[] data)
+        private string ByteArrayToId(byte[] data)
         {
-            StringBuilder ret = new StringBuilder();
-            for (int i = 0; i < data.Length; i++)
+            var ret = new StringBuilder();
+            for (var i = 0; i < data.Length; i++)
             {
                 if (i == 4 || i == 6 || i == 8 || i == 10)
                     ret.Append('-');
@@ -576,19 +557,19 @@ namespace LoLLauncher
             return ret.ToString();
         }
 
-        private object DecodeAMF0()
+        private object DecodeAmf0()
         {
             int type = ReadByte();
             switch (type)
             {
                 case 0x00:
-                    return ReadIntAMF0();
+                    return ReadIntAmf0();
 
                 case 0x02:
-                    return ReadStringAMF0();
+                    return ReadStringAmf0();
 
                 case 0x03:
-                    return ReadObjectAMF0();
+                    return ReadObjectAmf0();
 
                 case 0x05:
                     return null;
@@ -600,19 +581,19 @@ namespace LoLLauncher
             throw new NotImplementedException("AMF0 type not supported: " + type);
         }
 
-        private string ReadStringAMF0()
+        private string ReadStringAmf0()
         {
-            int length = (ReadByteAsInt() << 8) + ReadByteAsInt();
+            var length = (ReadByteAsInt() << 8) + ReadByteAsInt();
             if (length == 0)
                 return "";
 
-            byte[] data = ReadBytes(length);
+            var data = ReadBytes(length);
 
             // UTF-8 applicable?
             string str;
             try
             {
-                System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
+                var enc = new UTF8Encoding();
                 str = enc.GetString(data);
             }
             catch (Exception e)
@@ -623,22 +604,22 @@ namespace LoLLauncher
             return str;
         }
 
-        private int ReadIntAMF0()
+        private int ReadIntAmf0()
         {
-            return (int)ReadDouble();
+            return (int) ReadDouble();
         }
 
-        private TypedObject ReadObjectAMF0()
+        private TypedObject ReadObjectAmf0()
         {
-            TypedObject body = new TypedObject("Body");
+            var body = new TypedObject("Body");
             string key;
-            while (!(key = ReadStringAMF0()).Equals(""))
+            while (!(key = ReadStringAmf0()).Equals(""))
             {
-                byte b = ReadByte();
+                var b = ReadByte();
                 if (b == 0x00)
                     body.Add(key, ReadDouble());
                 else if (b == 0x02)
-                    body.Add(key, ReadStringAMF0());
+                    body.Add(key, ReadStringAmf0());
                 else if (b == 0x05)
                     body.Add(key, null);
                 else

@@ -1,45 +1,36 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Game
 {
-
-    public class GameDTO : RiotGamesObject
+    public class GameDto : RiotGamesObject
     {
+        public delegate void Callback(GameDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.game.GameDTO";
+
+        public GameDto()
+        {
+        }
+
+        public GameDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public GameDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.game.GameDTO";
-
-        public GameDTO()
-        {
-        }
-
-        public GameDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public GameDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(GameDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("spectatorsAllowed")]
@@ -139,7 +130,7 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         public String GameStateString { get; set; }
 
         [InternalName("playerChampionSelections")]
-        public List<PlayerChampionSelectionDTO> PlayerChampionSelections { get; set; }
+        public List<PlayerChampionSelectionDto> PlayerChampionSelections { get; set; }
 
         [InternalName("joinTimerDuration")]
         public Int32 JoinTimerDuration { get; set; }
@@ -147,5 +138,10 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         [InternalName("passbackDataPacket")]
         public object PassbackDataPacket { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

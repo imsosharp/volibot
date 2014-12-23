@@ -1,23 +1,19 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using LoLLauncher.RiotObjects.Team;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Statistics
 {
-
     public class EndOfGameStats : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(EndOfGameStats result);
 
-        private string type = "com.riotgames.platform.statistics.EndOfGameStats";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.statistics.EndOfGameStats";
 
         public EndOfGameStats()
         {
@@ -25,22 +21,17 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
 
         public EndOfGameStats(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public EndOfGameStats(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(EndOfGameStats result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("talentPointsGained")]
@@ -181,5 +172,10 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         [InternalName("customMsecsUntilReset")]
         public Double CustomMsecsUntilReset { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

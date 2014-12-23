@@ -1,45 +1,35 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Game
 {
-
-    public class PlatformGameLifecycleDTO : RiotGamesObject
+    public class PlatformGameLifecycleDto : RiotGamesObject
     {
+        public delegate void Callback(PlatformGameLifecycleDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.game.PlatformGameLifecycleDTO";
+
+        public PlatformGameLifecycleDto()
+        {
+        }
+
+        public PlatformGameLifecycleDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public PlatformGameLifecycleDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.game.PlatformGameLifecycleDTO";
-
-        public PlatformGameLifecycleDTO()
-        {
-        }
-
-        public PlatformGameLifecycleDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public PlatformGameLifecycleDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(PlatformGameLifecycleDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("gameSpecificLoyaltyRewards")]
@@ -52,7 +42,7 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         public object LastModifiedDate { get; set; }
 
         [InternalName("game")]
-        public GameDTO Game { get; set; }
+        public GameDto Game { get; set; }
 
         [InternalName("playerCredentials")]
         public PlayerCredentialsDto PlayerCredentials { get; set; }
@@ -63,5 +53,10 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         [InternalName("connectivityStateEnum")]
         public object ConnectivityStateEnum { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

@@ -1,22 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Account
 {
-
     public class AccountSummary : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(AccountSummary result);
 
-        private string type = "com.riotgames.platform.account.AccountSummary";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.account.AccountSummary";
 
         public AccountSummary()
         {
@@ -24,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Account
 
         public AccountSummary(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public AccountSummary(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(AccountSummary result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("groupCount")]
@@ -69,5 +59,10 @@ namespace LoLLauncher.RiotObjects.Platform.Account
         [InternalName("needsPasswordReset")]
         public Boolean NeedsPasswordReset { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

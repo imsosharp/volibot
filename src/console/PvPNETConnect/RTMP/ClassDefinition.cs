@@ -1,15 +1,16 @@
-﻿using System;
+﻿#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher
 {
-   public class ClassDefinition
-   {
-      public string type;
-      public bool externalizable = false;
-      public bool dynamic = false;
-      public List<string> members = new List<string>();
-   }
+    public class ClassDefinition
+    {
+        public bool Dynamic = false;
+        public bool Externalizable = false;
+        public List<string> Members = new List<string>();
+        public string Type;
+    }
 }

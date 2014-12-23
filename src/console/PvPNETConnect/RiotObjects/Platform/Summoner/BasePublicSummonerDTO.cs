@@ -1,45 +1,35 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner
 {
-
-    public class BasePublicSummonerDTO : RiotGamesObject
+    public class BasePublicSummonerDto : RiotGamesObject
     {
+        public delegate void Callback(BasePublicSummonerDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.summoner.BasePublicSummonerDTO";
+
+        public BasePublicSummonerDto()
+        {
+        }
+
+        public BasePublicSummonerDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public BasePublicSummonerDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.summoner.BasePublicSummonerDTO";
-
-        public BasePublicSummonerDTO()
-        {
-        }
-
-        public BasePublicSummonerDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public BasePublicSummonerDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(BasePublicSummonerDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("seasonTwoTier")]
@@ -63,5 +53,10 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
         [InternalName("profileIconId")]
         public Int32 ProfileIconId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

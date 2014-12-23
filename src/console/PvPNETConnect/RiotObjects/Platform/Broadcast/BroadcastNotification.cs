@@ -1,22 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace LoLLauncher.RiotObjects.Platform.Broadcast
 {
-
     public class BroadcastNotification : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(BroadcastNotification result);
 
-        private string type = "com.riotgames.platform.broadcast.BroadcastNotification";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.broadcast.BroadcastNotification";
 
         public BroadcastNotification()
         {
@@ -24,23 +13,23 @@ namespace LoLLauncher.RiotObjects.Platform.Broadcast
 
         public BroadcastNotification(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public BroadcastNotification(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(BroadcastNotification result);
-
-        private Callback callback;
+        public override string TypeName
+        {
+            get { return _type; }
+        }
 
         public override void DoCallback(TypedObject result)
         {
-            base.SetFields(this, result);
-            callback(this);
+            SetFields(this, result);
+            _callback(this);
         }
-
     }
 }

@@ -1,23 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LoLLauncher.RiotObjects.Platform.Summoner;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner.Masterybook
 {
-
     public class TalentEntry : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(TalentEntry result);
 
-        private string type = "com.riotgames.platform.summoner.masterybook.TalentEntry";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.summoner.masterybook.TalentEntry";
 
         public TalentEntry()
         {
@@ -25,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner.Masterybook
 
         public TalentEntry(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public TalentEntry(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(TalentEntry result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("rank")]
@@ -55,5 +44,10 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner.Masterybook
         [InternalName("summonerId")]
         public Double SummonerId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

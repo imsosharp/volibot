@@ -1,22 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Reroll.Pojo
 {
-
     public class PointSummary : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(PointSummary result);
 
-        private string type = "com.riotgames.platform.reroll.pojo.PointSummary";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.reroll.pojo.PointSummary";
 
         public PointSummary()
         {
@@ -24,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Reroll.Pojo
 
         public PointSummary(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public PointSummary(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(PointSummary result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("pointsToNextRoll")]
@@ -57,5 +47,10 @@ namespace LoLLauncher.RiotObjects.Platform.Reroll.Pojo
         [InternalName("currentPoints")]
         public Double CurrentPoints { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

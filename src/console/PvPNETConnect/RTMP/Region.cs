@@ -1,120 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace LoLLauncher
 {
     public enum Region
     {
-        [ServerValue("prod.na2.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.na2.lol.riotgames.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(false)]
-        NA,
+        [ServerValue("prod.na2.lol.riotgames.com")] [LoginQueueValue("https://lq.na2.lol.riotgames.com/")] [LocaleValue("en_US")] [UseGarenaValue(false)] Na,
 
-        [ServerValue("prod.euw1.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.euw1.lol.riotgames.com/")]
-        [LocaleValue("en_GB")]
-        [UseGarenaValue(false)]
-        EUW,
+        [ServerValue("prod.euw1.lol.riotgames.com")] [LoginQueueValue("https://lq.euw1.lol.riotgames.com/")] [LocaleValue("en_GB")] [UseGarenaValue(false)] Euw,
 
-        [ServerValue("prod.eun1.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.eun1.lol.riotgames.com/")]
-        [LocaleValue("en_GB")]
-        [UseGarenaValue(false)]
-        EUN,
+        [ServerValue("prod.eun1.lol.riotgames.com")] [LoginQueueValue("https://lq.eun1.lol.riotgames.com/")] [LocaleValue("en_GB")] [UseGarenaValue(false)] Eun,
 
-        [ServerValue("prod.kr.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.kr.lol.riotgames.com/")]
-        [LocaleValue("ko_KR")]
-        [UseGarenaValue(false)]
-        KR,
+        [ServerValue("prod.kr.lol.riotgames.com")] [LoginQueueValue("https://lq.kr.lol.riotgames.com/")] [LocaleValue("ko_KR")] [UseGarenaValue(false)] Kr,
 
-        [ServerValue("prod.br.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.br.lol.riotgames.com/")]
-        [LocaleValue("pt_BR")]
-        [UseGarenaValue(false)]
-        BR,
+        [ServerValue("prod.br.lol.riotgames.com")] [LoginQueueValue("https://lq.br.lol.riotgames.com/")] [LocaleValue("pt_BR")] [UseGarenaValue(false)] Br,
 
-        [ServerValue("prod.tr.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.tr.lol.riotgames.com/")]
-        [LocaleValue("pt_BR")]
-        [UseGarenaValue(false)]
-        TR,
+        [ServerValue("prod.tr.lol.riotgames.com")] [LoginQueueValue("https://lq.tr.lol.riotgames.com/")] [LocaleValue("pt_BR")] [UseGarenaValue(false)] Tr,
 
-        [ServerValue("prod.ru.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.ru.lol.riotgames.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(false)]
-        RU,
+        [ServerValue("prod.ru.lol.riotgames.com")] [LoginQueueValue("https://lq.ru.lol.riotgames.com/")] [LocaleValue("en_US")] [UseGarenaValue(false)] Ru,
 
-        [ServerValue("prod.pbe1.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.pbe1.lol.riotgames.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(false)]
-        PBE,
+        [ServerValue("prod.pbe1.lol.riotgames.com")] [LoginQueueValue("https://lq.pbe1.lol.riotgames.com/")] [LocaleValue("en_US")] [UseGarenaValue(false)] Pbe,
 
-        [ServerValue("prod.lol.garenanow.com")]
-        [LoginQueueValue("https://lq.lol.garenanow.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(true)]
-        SG,
+        [ServerValue("prod.lol.garenanow.com")] [LoginQueueValue("https://lq.lol.garenanow.com/")] [LocaleValue("en_US")] [UseGarenaValue(true)] Sg,
 
-        [ServerValue("prod.lol.garenanow.com")]
-        [LoginQueueValue("https://lq.lol.garenanow.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(true)]
-        MY,
+        [ServerValue("prod.lol.garenanow.com")] [LoginQueueValue("https://lq.lol.garenanow.com/")] [LocaleValue("en_US")] [UseGarenaValue(true)] My,
 
-        [ServerValue("prod.lol.garenanow.com")]
-        [LoginQueueValue("https://lq.lol.garenanow.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(true)]
-        SGMY,
+        [ServerValue("prod.lol.garenanow.com")] [LoginQueueValue("https://lq.lol.garenanow.com/")] [LocaleValue("en_US")] [UseGarenaValue(true)] Sgmy,
 
-        [ServerValue("prodtw.lol.garenanow.com")]
-        [LoginQueueValue("https://loginqueuetw.lol.garenanow.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(true)]
-        TW,
+        [ServerValue("prodtw.lol.garenanow.com")] [LoginQueueValue("https://loginqueuetw.lol.garenanow.com/")] [LocaleValue("en_US")] [UseGarenaValue(true)] Tw,
 
-        [ServerValue("prodth.lol.garenanow.com")]
-        [LoginQueueValue("https://lqth.lol.garenanow.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(true)]
-        TH,
+        [ServerValue("prodth.lol.garenanow.com")] [LoginQueueValue("https://lqth.lol.garenanow.com/")] [LocaleValue("en_US")] [UseGarenaValue(true)] Th,
 
-        [ServerValue("prodph.lol.garenanow.com")]
-        [LoginQueueValue("https://storeph.lol.garenanow.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(true)]
-        PH,
+        [ServerValue("prodph.lol.garenanow.com")] [LoginQueueValue("https://storeph.lol.garenanow.com/")] [LocaleValue("en_US")] [UseGarenaValue(true)] Ph,
 
-        [ServerValue("prodvn.lol.garenanow.com")]
-        [LoginQueueValue("https://lqvn.lol.garenanow.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(true)]
-        VN,
+        [ServerValue("prodvn.lol.garenanow.com")] [LoginQueueValue("https://lqvn.lol.garenanow.com/")] [LocaleValue("en_US")] [UseGarenaValue(true)] Vn,
 
-        [ServerValue("prod.oc1.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.oc1.lol.riotgames.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(false)]
-        OCE,
+        [ServerValue("prod.oc1.lol.riotgames.com")] [LoginQueueValue("https://lq.oc1.lol.riotgames.com/")] [LocaleValue("en_US")] [UseGarenaValue(false)] Oce,
 
-        [ServerValue("prod.la1.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.la1.lol.riotgames.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(false)]
-        LAN,
+        [ServerValue("prod.la1.lol.riotgames.com")] [LoginQueueValue("https://lq.la1.lol.riotgames.com/")] [LocaleValue("en_US")] [UseGarenaValue(false)] Lan,
 
-        [ServerValue("prod.la2.lol.riotgames.com")]
-        [LoginQueueValue("https://lq.la2.lol.riotgames.com/")]
-        [LocaleValue("en_US")]
-        [UseGarenaValue(false)]
-        LAS
+        [ServerValue("prod.la2.lol.riotgames.com")] [LoginQueueValue("https://lq.la2.lol.riotgames.com/")] [LocaleValue("en_US")] [UseGarenaValue(false)] Las
     }
 
     public static class RegionInfo
@@ -122,12 +50,12 @@ namespace LoLLauncher
         public static string GetServerValue(Enum value)
         {
             string output = null;
-            Type type = value.GetType();
+            var type = value.GetType();
 
-            FieldInfo fi = type.GetField(value.ToString());
-            ServerValue[] attrs =
-               fi.GetCustomAttributes(typeof(ServerValue),
-                                       false) as ServerValue[];
+            var fi = type.GetField(value.ToString());
+            var attrs =
+                fi.GetCustomAttributes(typeof (ServerValue),
+                    false) as ServerValue[];
             if (attrs.Length > 0)
             {
                 output = attrs[0].Value;
@@ -138,12 +66,12 @@ namespace LoLLauncher
         public static string GetLoginQueueValue(Enum value)
         {
             string output = null;
-            Type type = value.GetType();
+            var type = value.GetType();
 
-            FieldInfo fi = type.GetField(value.ToString());
-            LoginQueueValue[] attrs =
-               fi.GetCustomAttributes(typeof(LoginQueueValue),
-                                       false) as LoginQueueValue[];
+            var fi = type.GetField(value.ToString());
+            var attrs =
+                fi.GetCustomAttributes(typeof (LoginQueueValue),
+                    false) as LoginQueueValue[];
             if (attrs.Length > 0)
             {
                 output = attrs[0].Value;
@@ -154,12 +82,12 @@ namespace LoLLauncher
         public static string GetLocaleValue(Enum value)
         {
             string output = null;
-            Type type = value.GetType();
+            var type = value.GetType();
 
-            FieldInfo fi = type.GetField(value.ToString());
-            LocaleValue[] attrs =
-               fi.GetCustomAttributes(typeof(LocaleValue),
-                                       false) as LocaleValue[];
+            var fi = type.GetField(value.ToString());
+            var attrs =
+                fi.GetCustomAttributes(typeof (LocaleValue),
+                    false) as LocaleValue[];
             if (attrs.Length > 0)
             {
                 output = attrs[0].Value;
@@ -169,13 +97,13 @@ namespace LoLLauncher
 
         public static bool GetUseGarenaValue(Enum value)
         {
-            bool output = false;
-            Type type = value.GetType();
+            var output = false;
+            var type = value.GetType();
 
-            FieldInfo fi = type.GetField(value.ToString());
-            UseGarenaValue[] attrs =
-               fi.GetCustomAttributes(typeof(UseGarenaValue),
-                                       false) as UseGarenaValue[];
+            var fi = type.GetField(value.ToString());
+            var attrs =
+                fi.GetCustomAttributes(typeof (UseGarenaValue),
+                    false) as UseGarenaValue[];
             if (attrs.Length > 0)
             {
                 output = attrs[0].Value;
@@ -184,63 +112,43 @@ namespace LoLLauncher
         }
     }
 
-    public class ServerValue : System.Attribute
+    public class ServerValue : Attribute
     {
-        private string _value;
-
         public ServerValue(string value)
         {
-            _value = value;
+            Value = value;
         }
 
-        public string Value
-        {
-            get { return _value; }
-        }
+        public string Value { get; private set; }
     }
 
-    public class LoginQueueValue : System.Attribute
+    public class LoginQueueValue : Attribute
     {
-        private string _value;
-
         public LoginQueueValue(string value)
         {
-            _value = value;
+            Value = value;
         }
 
-        public string Value
-        {
-            get { return _value; }
-        }
+        public string Value { get; private set; }
     }
 
-    public class LocaleValue : System.Attribute
+    public class LocaleValue : Attribute
     {
-        private string _value;
-
         public LocaleValue(string value)
         {
-            _value = value;
+            Value = value;
         }
 
-        public string Value
-        {
-            get { return _value; }
-        }
+        public string Value { get; private set; }
     }
 
-    public class UseGarenaValue : System.Attribute
+    public class UseGarenaValue : Attribute
     {
-        private bool _value;
-
         public UseGarenaValue(bool value)
         {
-            _value = value;
+            Value = value;
         }
 
-        public bool Value
-        {
-            get { return _value; }
-        }
+        public bool Value { get; private set; }
     }
 }

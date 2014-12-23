@@ -1,41 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Game
 {
-
-    public class ChampionBanInfoDTO : RiotGamesObject
+    public class ChampionBanInfoDto : RiotGamesObject
     {
+        public delegate void Callback(ChampionBanInfoDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.game.ChampionBanInfoDTO";
+
+        public ChampionBanInfoDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public ChampionBanInfoDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.game.ChampionBanInfoDTO";
-
-        public ChampionBanInfoDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public ChampionBanInfoDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(ChampionBanInfoDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("enemyOwned")]
@@ -47,5 +37,10 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         [InternalName("owned")]
         public Boolean Owned { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

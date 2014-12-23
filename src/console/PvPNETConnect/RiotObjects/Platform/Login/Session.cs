@@ -1,23 +1,18 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using LoLLauncher.RiotObjects.Platform.Account;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Login
 {
-
     public class Session : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(Session result);
 
-        private string type = "com.riotgames.platform.login.Session";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.login.Session";
 
         public Session()
         {
@@ -25,22 +20,17 @@ namespace LoLLauncher.RiotObjects.Platform.Login
 
         public Session(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public Session(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(Session result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("token")]
@@ -52,5 +42,10 @@ namespace LoLLauncher.RiotObjects.Platform.Login
         [InternalName("accountSummary")]
         public AccountSummary AccountSummary { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

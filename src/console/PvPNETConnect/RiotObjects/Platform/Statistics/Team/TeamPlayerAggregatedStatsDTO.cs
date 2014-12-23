@@ -1,46 +1,35 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LoLLauncher.RiotObjects.Platform.Statistics;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Statistics.Team
 {
-
-    public class TeamPlayerAggregatedStatsDTO : RiotGamesObject
+    public class TeamPlayerAggregatedStatsDto : RiotGamesObject
     {
+        public delegate void Callback(TeamPlayerAggregatedStatsDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.statistics.team.TeamPlayerAggregatedStatsDTO";
+
+        public TeamPlayerAggregatedStatsDto()
+        {
+        }
+
+        public TeamPlayerAggregatedStatsDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public TeamPlayerAggregatedStatsDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.statistics.team.TeamPlayerAggregatedStatsDTO";
-
-        public TeamPlayerAggregatedStatsDTO()
-        {
-        }
-
-        public TeamPlayerAggregatedStatsDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public TeamPlayerAggregatedStatsDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(TeamPlayerAggregatedStatsDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("playerId")]
@@ -49,5 +38,10 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics.Team
         [InternalName("aggregatedStats")]
         public AggregatedStats AggregatedStats { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

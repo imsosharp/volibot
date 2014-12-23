@@ -1,47 +1,48 @@
-﻿using LoLLauncher;
-using LoLLauncher.RiotObjects;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 
+#endregion
+
 namespace LoLLauncher.RiotObjects.Platform.Summoner.Icon
 {
-    public class SummonerIconInventoryDTO : RiotGamesObject
+    public class SummonerIconInventoryDto : RiotGamesObject
     {
+        public delegate void Callback(SummonerIconInventoryDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.summoner.icon.SummonerIconInventoryDTO";
+
+        public SummonerIconInventoryDto()
+        {
+        }
+
+        public SummonerIconInventoryDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public SummonerIconInventoryDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get { return this.type; }
-        }
-
-        private string type = "com.riotgames.platform.summoner.icon.SummonerIconInventoryDTO";
-
-        public SummonerIconInventoryDTO()
-        {
-        }
-
-        public SummonerIconInventoryDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public SummonerIconInventoryDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(SummonerIconInventoryDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("summonerId")]
         public Double SummonerId { get; set; }
 
         [InternalName("summonerIcons")]
-        public List<Platform.Catalog.Icon.Icon> SummonerIcons { get; set; }
+        public List<Catalog.Icon.Icon> SummonerIcons { get; set; }
+
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

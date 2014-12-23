@@ -1,23 +1,18 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LoLLauncher.RiotObjects.Team;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Team.Stats
 {
-
     public class TeamStatSummary : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(TeamStatSummary result);
 
-        private string type = "com.riotgames.team.stats.TeamStatSummary";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.team.stats.TeamStatSummary";
 
         public TeamStatSummary()
         {
@@ -25,22 +20,17 @@ namespace LoLLauncher.RiotObjects.Team.Stats
 
         public TeamStatSummary(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public TeamStatSummary(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(TeamStatSummary result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("teamStatDetails")]
@@ -52,5 +42,10 @@ namespace LoLLauncher.RiotObjects.Team.Stats
         [InternalName("teamId")]
         public TeamId TeamId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

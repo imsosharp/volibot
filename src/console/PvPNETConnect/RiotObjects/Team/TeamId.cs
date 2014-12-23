@@ -1,22 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Team
 {
-
     public class TeamId : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(TeamId result);
 
-        private string type = "com.riotgames.team.TeamId";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.team.TeamId";
 
         public TeamId()
         {
@@ -24,26 +19,26 @@ namespace LoLLauncher.RiotObjects.Team
 
         public TeamId(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public TeamId(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(TeamId result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("fullId")]
         public String FullId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

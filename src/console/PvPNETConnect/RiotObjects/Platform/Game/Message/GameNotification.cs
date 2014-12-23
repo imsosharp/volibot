@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Game.Message
 {
     public class GameNotification : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(GameNotification result);
 
-        private string type = "com.riotgames.platform.game.message.GameNotification";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.game.message.GameNotification";
 
         public GameNotification()
         {
@@ -24,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Game.Message
 
         public GameNotification(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public GameNotification(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(GameNotification result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("messageCode")]
@@ -51,5 +41,10 @@ namespace LoLLauncher.RiotObjects.Platform.Game.Message
         [InternalName("messageArgument")]
         public object MessageArgument { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

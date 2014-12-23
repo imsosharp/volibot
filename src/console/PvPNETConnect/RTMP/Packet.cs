@@ -1,69 +1,73 @@
-﻿using System;
+﻿#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher
 {
     public class Packet
     {
-        private byte[] dataBuffer;
-        private int dataPos;
-        private int dataSize;
-        private int packetType;
-        private List<byte> rawPacketBytes;
+        private byte[] _dataBuffer;
+        private int _dataPos;
+        private int _dataSize;
+        private int _packetType;
+        private readonly List<byte> _rawPacketBytes;
 
         public Packet()
         {
-            this.rawPacketBytes = new List<byte>();
+            _rawPacketBytes = new List<byte>();
         }
+
         public void SetSize(int size)
         {
-            dataSize = size;
-            dataBuffer = new byte[dataSize];
+            _dataSize = size;
+            _dataBuffer = new byte[_dataSize];
         }
 
         public void SetType(int type)
         {
-            packetType = type;
+            _packetType = type;
         }
 
         public void Add(byte b)
         {
-            dataBuffer[dataPos++] = b;
+            _dataBuffer[_dataPos++] = b;
         }
 
         public bool IsComplete()
         {
-            return (dataPos == dataSize);
+            return (_dataPos == _dataSize);
         }
 
         public int GetSize()
         {
-            return dataSize;
+            return _dataSize;
         }
 
         public int GetPacketType()
         {
-            return packetType;
+            return _packetType;
         }
 
         public byte[] GetData()
         {
-            return dataBuffer;
+            return _dataBuffer;
         }
 
         public void AddToRaw(byte b)
         {
-            rawPacketBytes.Add(b);
+            _rawPacketBytes.Add(b);
         }
+
         public void AddToRaw(byte[] b)
         {
-            rawPacketBytes.AddRange(b);
+            _rawPacketBytes.AddRange(b);
         }
+
         public byte[] GetRawData()
         {
-            return rawPacketBytes.ToArray();
+            return _rawPacketBytes.ToArray();
         }
     }
 }

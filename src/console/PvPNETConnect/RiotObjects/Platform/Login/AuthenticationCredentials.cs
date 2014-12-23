@@ -1,22 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Login
 {
-
     public class AuthenticationCredentials : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(AuthenticationCredentials result);
 
-        private string type = "com.riotgames.platform.login.AuthenticationCredentials";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.login.AuthenticationCredentials";
 
         public AuthenticationCredentials()
         {
@@ -24,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Login
 
         public AuthenticationCredentials(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public AuthenticationCredentials(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(AuthenticationCredentials result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("oldPassword")]
@@ -75,5 +65,10 @@ namespace LoLLauncher.RiotObjects.Platform.Login
         [InternalName("operatingSystem")]
         public String OperatingSystem { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

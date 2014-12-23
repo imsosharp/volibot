@@ -1,28 +1,24 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using LoLLauncher.RiotObjects.Kudos.Dto;
+using LoLLauncher.RiotObjects.Platform.Broadcast;
+using LoLLauncher.RiotObjects.Platform.Game;
 using LoLLauncher.RiotObjects.Platform.Statistics;
 using LoLLauncher.RiotObjects.Platform.Summoner;
-using LoLLauncher.RiotObjects.Platform.Broadcast;
 using LoLLauncher.RiotObjects.Platform.Systemstate;
-using LoLLauncher.RiotObjects.Kudos.Dto;
-using LoLLauncher.RiotObjects.Platform.Game;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Clientfacade.Domain
 {
-
     public class LoginDataPacket : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(LoginDataPacket result);
 
-        private string type = "com.riotgames.platform.clientfacade.domain.LoginDataPacket";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.clientfacade.domain.LoginDataPacket";
 
         public LoginDataPacket()
         {
@@ -30,22 +26,17 @@ namespace LoLLauncher.RiotObjects.Platform.Clientfacade.Domain
 
         public LoginDataPacket(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public LoginDataPacket(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(LoginDataPacket result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("playerStatSummaries")]
@@ -70,7 +61,7 @@ namespace LoLLauncher.RiotObjects.Platform.Clientfacade.Domain
         public Double IpBalance { get; set; }
 
         [InternalName("reconnectInfo")]
-        public PlatformGameLifecycleDTO ReconnectInfo { get; set; }
+        public PlatformGameLifecycleDto ReconnectInfo { get; set; }
 
         [InternalName("languages")]
         public List<String> Languages { get; set; }
@@ -85,7 +76,7 @@ namespace LoLLauncher.RiotObjects.Platform.Clientfacade.Domain
         public Int32 CustomMinutesLeftToday { get; set; }
 
         [InternalName("platformGameLifecycleDTO")]
-        public object PlatformGameLifecycleDTO { get; set; }
+        public object PlatformGameLifecycleDto { get; set; }
 
         [InternalName("coOpVsAiMinutesLeftToday")]
         public Int32 CoOpVsAiMinutesLeftToday { get; set; }
@@ -124,7 +115,7 @@ namespace LoLLauncher.RiotObjects.Platform.Clientfacade.Domain
         public Double BingeMinutesRemaining { get; set; }
 
         [InternalName("pendingKudosDTO")]
-        public PendingKudosDTO PendingKudosDTO { get; set; }
+        public PendingKudosDto PendingKudosDto { get; set; }
 
         [InternalName("leaverBusterPenaltyTime")]
         public Int32 LeaverBusterPenaltyTime { get; set; }
@@ -142,7 +133,7 @@ namespace LoLLauncher.RiotObjects.Platform.Clientfacade.Domain
         public Double RpBalance { get; set; }
 
         [InternalName("gameTypeConfigs")]
-        public List<GameTypeConfigDTO> GameTypeConfigs { get; set; }
+        public List<GameTypeConfigDto> GameTypeConfigs { get; set; }
 
         [InternalName("bingeIsPlayerInBingePreventionWindow")]
         public Boolean BingeIsPlayerInBingePreventionWindow { get; set; }
@@ -156,5 +147,10 @@ namespace LoLLauncher.RiotObjects.Platform.Clientfacade.Domain
         [InternalName("customMsecsUntilReset")]
         public Double CustomMsecsUntilReset { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

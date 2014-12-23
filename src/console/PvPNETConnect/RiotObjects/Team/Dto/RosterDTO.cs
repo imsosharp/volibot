@@ -1,52 +1,48 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Team.Dto
 {
-
-    public class RosterDTO : RiotGamesObject
+    public class RosterDto : RiotGamesObject
     {
+        public delegate void Callback(RosterDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.team.dto.RosterDTO";
+
+        public RosterDto()
+        {
+        }
+
+        public RosterDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public RosterDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.team.dto.RosterDTO";
-
-        public RosterDTO()
-        {
-        }
-
-        public RosterDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public RosterDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(RosterDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("ownerId")]
         public Double OwnerId { get; set; }
 
         [InternalName("memberList")]
-        public List<TeamMemberInfoDTO> MemberList { get; set; }
+        public List<TeamMemberInfoDto> MemberList { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

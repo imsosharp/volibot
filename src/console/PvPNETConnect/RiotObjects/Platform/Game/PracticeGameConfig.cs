@@ -1,23 +1,18 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using LoLLauncher.RiotObjects.Platform.Game.Map;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Game
 {
-
     public class PracticeGameConfig : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(PracticeGameConfig result);
 
-        private string type = "com.riotgames.platform.game.PracticeGameConfig";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.game.PracticeGameConfig";
 
         public PracticeGameConfig()
         {
@@ -25,22 +20,17 @@ namespace LoLLauncher.RiotObjects.Platform.Game
 
         public PracticeGameConfig(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public PracticeGameConfig(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(PracticeGameConfig result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("passbackUrl")]
@@ -73,5 +63,10 @@ namespace LoLLauncher.RiotObjects.Platform.Game
         [InternalName("region")]
         public String Region { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

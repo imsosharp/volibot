@@ -1,23 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LoLLauncher.RiotObjects;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner
 {
-
     public class SummonerDefaultSpells : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(SummonerDefaultSpells result);
 
-        private string type = "com.riotgames.platform.summoner.SummonerDefaultSpells";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.summoner.SummonerDefaultSpells";
 
         public SummonerDefaultSpells()
         {
@@ -25,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
 
         public SummonerDefaultSpells(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public SummonerDefaultSpells(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(SummonerDefaultSpells result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("summonerDefaultSpellsJson")]
@@ -52,5 +41,10 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner
         [InternalName("summonerId")]
         public Double SummonerId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

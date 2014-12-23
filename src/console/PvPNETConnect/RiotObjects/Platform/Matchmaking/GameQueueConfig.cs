@@ -1,22 +1,18 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Matchmaking
 {
-
     public class GameQueueConfig : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(GameQueueConfig result);
 
-        private string type = "com.riotgames.platform.matchmaking.GameQueueConfig";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.matchmaking.GameQueueConfig";
 
         public GameQueueConfig()
         {
@@ -24,22 +20,17 @@ namespace LoLLauncher.RiotObjects.Platform.Matchmaking
 
         public GameQueueConfig(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public GameQueueConfig(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(GameQueueConfig result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("blockedMinutesThreshold")]
@@ -117,5 +108,10 @@ namespace LoLLauncher.RiotObjects.Platform.Matchmaking
         [InternalName("matchingThrottleConfig")]
         public MatchingThrottleConfig MatchingThrottleConfig { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

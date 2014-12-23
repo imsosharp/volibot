@@ -1,22 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Catalog.Runes
 {
-
     public class RuneType : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(RuneType result);
 
-        private string type = "com.riotgames.platform.catalog.runes.RuneType";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.catalog.runes.RuneType";
 
         public RuneType()
         {
@@ -24,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Runes
 
         public RuneType(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public RuneType(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(RuneType result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("runeTypeId")]
@@ -48,5 +38,10 @@ namespace LoLLauncher.RiotObjects.Platform.Catalog.Runes
         [InternalName("name")]
         public String Name { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

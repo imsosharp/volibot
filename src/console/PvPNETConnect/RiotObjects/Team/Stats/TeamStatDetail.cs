@@ -1,23 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LoLLauncher.RiotObjects.Team;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Team.Stats
 {
-
     public class TeamStatDetail : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(TeamStatDetail result);
 
-        private string type = "com.riotgames.team.stats.TeamStatDetail";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.team.stats.TeamStatDetail";
 
         public TeamStatDetail()
         {
@@ -25,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Team.Stats
 
         public TeamStatDetail(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public TeamStatDetail(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(TeamStatDetail result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("maxRating")]
@@ -73,5 +62,10 @@ namespace LoLLauncher.RiotObjects.Team.Stats
         [InternalName("teamStatType")]
         public String TeamStatType { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

@@ -1,22 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Statistics
 {
-
     public class PlayerStatSummary : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(PlayerStatSummary result);
 
-        private string type = "com.riotgames.platform.statistics.PlayerStatSummary";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.statistics.PlayerStatSummary";
 
         public PlayerStatSummary()
         {
@@ -24,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
 
         public PlayerStatSummary(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public PlayerStatSummary(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(PlayerStatSummary result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("maxRating")]
@@ -75,5 +65,10 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         [InternalName("wins")]
         public Int32 Wins { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

@@ -1,22 +1,17 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Team
 {
-
     public class CreatedTeam : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(CreatedTeam result);
 
-        private string type = "com.riotgames.team.CreatedTeam";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.team.CreatedTeam";
 
         public CreatedTeam()
         {
@@ -24,22 +19,17 @@ namespace LoLLauncher.RiotObjects.Team
 
         public CreatedTeam(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public CreatedTeam(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(CreatedTeam result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("timeStamp")]
@@ -48,5 +38,10 @@ namespace LoLLauncher.RiotObjects.Team
         [InternalName("teamId")]
         public TeamId TeamId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

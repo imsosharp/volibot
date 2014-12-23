@@ -1,45 +1,36 @@
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner.Spellbook
 {
-
-    public class SpellBookPageDTO : RiotGamesObject
+    public class SpellBookPageDto : RiotGamesObject
     {
+        public delegate void Callback(SpellBookPageDto result);
+
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.summoner.spellbook.SpellBookPageDTO";
+
+        public SpellBookPageDto()
+        {
+        }
+
+        public SpellBookPageDto(Callback callback)
+        {
+            this._callback = callback;
+        }
+
+        public SpellBookPageDto(TypedObject result)
+        {
+            SetFields(this, result);
+        }
+
         public override string TypeName
         {
-            get
-            {
-                return this.type;
-            }
-        }
-
-        private string type = "com.riotgames.platform.summoner.spellbook.SpellBookPageDTO";
-
-        public SpellBookPageDTO()
-        {
-        }
-
-        public SpellBookPageDTO(Callback callback)
-        {
-            this.callback = callback;
-        }
-
-        public SpellBookPageDTO(TypedObject result)
-        {
-            base.SetFields(this, result);
-        }
-
-        public delegate void Callback(SpellBookPageDTO result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
-        {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("slotEntries")]
@@ -60,5 +51,10 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner.Spellbook
         [InternalName("current")]
         public Boolean Current { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }

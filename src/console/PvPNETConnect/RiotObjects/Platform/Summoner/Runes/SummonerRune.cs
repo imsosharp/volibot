@@ -1,23 +1,18 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using LoLLauncher.RiotObjects.Platform.Catalog.Runes;
+
+#endregion
 
 namespace LoLLauncher.RiotObjects.Platform.Summoner.Runes
 {
-
     public class SummonerRune : RiotGamesObject
     {
-        public override string TypeName
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+        public delegate void Callback(SummonerRune result);
 
-        private string type = "com.riotgames.platform.summoner.runes.SummonerRune";
+        private readonly Callback _callback;
+        private readonly string _type = "com.riotgames.platform.summoner.runes.SummonerRune";
 
         public SummonerRune()
         {
@@ -25,22 +20,17 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner.Runes
 
         public SummonerRune(Callback callback)
         {
-            this.callback = callback;
+            this._callback = callback;
         }
 
         public SummonerRune(TypedObject result)
         {
-            base.SetFields(this, result);
+            SetFields(this, result);
         }
 
-        public delegate void Callback(SummonerRune result);
-
-        private Callback callback;
-
-        public override void DoCallback(TypedObject result)
+        public override string TypeName
         {
-            base.SetFields(this, result);
-            callback(this);
+            get { return _type; }
         }
 
         [InternalName("purchased")]
@@ -61,5 +51,10 @@ namespace LoLLauncher.RiotObjects.Platform.Summoner.Runes
         [InternalName("summonerId")]
         public Double SummonerId { get; set; }
 
+        public override void DoCallback(TypedObject result)
+        {
+            SetFields(this, result);
+            _callback(this);
+        }
     }
 }
