@@ -18,7 +18,7 @@ namespace RitoBot
             InitializeComponent();
             Print("GUI Version of Volibot loaded successfuly!");
             Print("Volibot version: " + Program.cversion);
-            Print("brought to you by imsosharp.", 4);
+            Print("brought to you by Team WeAreSoChewy.", 3);
         }
 
         public void Print(string text)
