@@ -57,6 +57,14 @@
             this.LauncherPathInput = new System.Windows.Forms.TextBox();
             this.launcherPathLabel = new System.Windows.Forms.Label();
             this.console = new System.Windows.Forms.RichTextBox();
+            this.DefaultChampionInput = new System.Windows.Forms.ComboBox();
+            this.defaultChampionLabel = new System.Windows.Forms.Label();
+            this.DefaultQueueInput = new System.Windows.Forms.ComboBox();
+            this.defaultQueueLabel = new System.Windows.Forms.Label();
+            this.MaxBotsInput = new System.Windows.Forms.TextBox();
+            this.maxBotsLabel = new System.Windows.Forms.Label();
+            this.MaxLevelInput = new System.Windows.Forms.TextBox();
+            this.maxLevelLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.mainWindowSplitContainer)).BeginInit();
             this.mainWindowSplitContainer.Panel1.SuspendLayout();
             this.mainWindowSplitContainer.Panel2.SuspendLayout();
@@ -74,9 +82,7 @@
             // 
             // mainWindowSplitContainer.Panel1
             // 
-            this.mainWindowSplitContainer.Panel1.BackColor = System.Drawing.Color.Transparent;
-            this.mainWindowSplitContainer.Panel1.Controls.Add(this.LoadedAccounts);
-            this.mainWindowSplitContainer.Panel1.Controls.Add(this.accountsLabel);
+            this.mainWindowSplitContainer.Panel1.BackColor = System.Drawing.SystemColors.Control;
             this.mainWindowSplitContainer.Panel1.Controls.Add(this.configTabControl);
             // 
             // mainWindowSplitContainer.Panel2
@@ -88,19 +94,20 @@
             // 
             // LoadedAccounts
             // 
-            this.LoadedAccounts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.LoadedAccounts.Location = new System.Drawing.Point(0, 261);
+            this.LoadedAccounts.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.LoadedAccounts.Location = new System.Drawing.Point(0, 185);
             this.LoadedAccounts.Name = "LoadedAccounts";
-            this.LoadedAccounts.Size = new System.Drawing.Size(340, 213);
+            this.LoadedAccounts.Size = new System.Drawing.Size(332, 260);
             this.LoadedAccounts.TabIndex = 3;
             this.LoadedAccounts.Text = "";
             // 
             // accountsLabel
             // 
             this.accountsLabel.AutoSize = true;
-            this.accountsLabel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.accountsLabel.ForeColor = System.Drawing.Color.DarkGreen;
-            this.accountsLabel.Location = new System.Drawing.Point(0, 248);
+            this.accountsLabel.ForeColor = System.Drawing.Color.Black;
+            this.accountsLabel.Location = new System.Drawing.Point(3, 169);
             this.accountsLabel.Name = "accountsLabel";
             this.accountsLabel.Size = new System.Drawing.Size(52, 13);
             this.accountsLabel.TabIndex = 2;
@@ -110,16 +117,18 @@
             // 
             this.configTabControl.Controls.Add(this.accountsTab);
             this.configTabControl.Controls.Add(this.settingsTab);
-            this.configTabControl.Dock = System.Windows.Forms.DockStyle.Top;
+            this.configTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.configTabControl.Location = new System.Drawing.Point(0, 0);
             this.configTabControl.Name = "configTabControl";
             this.configTabControl.SelectedIndex = 0;
-            this.configTabControl.Size = new System.Drawing.Size(340, 248);
+            this.configTabControl.Size = new System.Drawing.Size(340, 474);
             this.configTabControl.TabIndex = 1;
             // 
             // accountsTab
             // 
+            this.accountsTab.Controls.Add(this.LoadedAccounts);
             this.accountsTab.Controls.Add(this.SelectChampionInput);
+            this.accountsTab.Controls.Add(this.accountsLabel);
             this.accountsTab.Controls.Add(this.selectChampionLabel);
             this.accountsTab.Controls.Add(this.QueueTypeInput);
             this.accountsTab.Controls.Add(this.QueueTypeLabel);
@@ -131,7 +140,7 @@
             this.accountsTab.Location = new System.Drawing.Point(4, 22);
             this.accountsTab.Name = "accountsTab";
             this.accountsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.accountsTab.Size = new System.Drawing.Size(332, 222);
+            this.accountsTab.Size = new System.Drawing.Size(332, 448);
             this.accountsTab.TabIndex = 0;
             this.accountsTab.Text = "Accounts";
             this.accountsTab.UseVisualStyleBackColor = true;
@@ -187,11 +196,9 @@
             // 
             // addAccountsBtn
             // 
-            this.addAccountsBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.addAccountsBtn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.addAccountsBtn.AutoSize = true;
-            this.addAccountsBtn.Location = new System.Drawing.Point(3, 148);
+            this.addAccountsBtn.Location = new System.Drawing.Point(3, 143);
             this.addAccountsBtn.Name = "addAccountsBtn";
             this.addAccountsBtn.Size = new System.Drawing.Size(326, 23);
             this.addAccountsBtn.TabIndex = 4;
@@ -237,6 +244,14 @@
             // 
             // settingsTab
             // 
+            this.settingsTab.Controls.Add(this.MaxLevelInput);
+            this.settingsTab.Controls.Add(this.maxLevelLabel);
+            this.settingsTab.Controls.Add(this.MaxBotsInput);
+            this.settingsTab.Controls.Add(this.maxBotsLabel);
+            this.settingsTab.Controls.Add(this.DefaultQueueInput);
+            this.settingsTab.Controls.Add(this.defaultQueueLabel);
+            this.settingsTab.Controls.Add(this.DefaultChampionInput);
+            this.settingsTab.Controls.Add(this.defaultChampionLabel);
             this.settingsTab.Controls.Add(this.replaceConfigBtn);
             this.settingsTab.Controls.Add(this.saveBtn);
             this.settingsTab.Controls.Add(this.BuyBoostInput);
@@ -252,16 +267,16 @@
             this.settingsTab.Location = new System.Drawing.Point(4, 22);
             this.settingsTab.Name = "settingsTab";
             this.settingsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.settingsTab.Size = new System.Drawing.Size(332, 222);
+            this.settingsTab.Size = new System.Drawing.Size(332, 448);
             this.settingsTab.TabIndex = 1;
             this.settingsTab.Text = "Settings";
             this.settingsTab.UseVisualStyleBackColor = true;
             // 
             // replaceConfigBtn
             // 
-            this.replaceConfigBtn.AutoSize = true;
-            this.replaceConfigBtn.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.replaceConfigBtn.Location = new System.Drawing.Point(3, 196);
+            this.replaceConfigBtn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.replaceConfigBtn.Location = new System.Drawing.Point(3, 341);
             this.replaceConfigBtn.Name = "replaceConfigBtn";
             this.replaceConfigBtn.Size = new System.Drawing.Size(326, 23);
             this.replaceConfigBtn.TabIndex = 13;
@@ -271,9 +286,9 @@
             // 
             // saveBtn
             // 
-            this.saveBtn.AutoSize = true;
-            this.saveBtn.Dock = System.Windows.Forms.DockStyle.Top;
-            this.saveBtn.Location = new System.Drawing.Point(3, 172);
+            this.saveBtn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.saveBtn.Location = new System.Drawing.Point(3, 312);
             this.saveBtn.Name = "saveBtn";
             this.saveBtn.Size = new System.Drawing.Size(326, 23);
             this.saveBtn.TabIndex = 12;
@@ -416,7 +431,7 @@
             this.console.BackColor = System.Drawing.Color.Black;
             this.console.DetectUrls = false;
             this.console.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.console.ForeColor = System.Drawing.Color.DarkGreen;
+            this.console.ForeColor = System.Drawing.Color.Lime;
             this.console.ImeMode = System.Windows.Forms.ImeMode.On;
             this.console.Location = new System.Drawing.Point(0, 0);
             this.console.Name = "console";
@@ -424,6 +439,86 @@
             this.console.Size = new System.Drawing.Size(678, 474);
             this.console.TabIndex = 0;
             this.console.Text = "";
+            // 
+            // DefaultChampionInput
+            // 
+            this.DefaultChampionInput.Dock = System.Windows.Forms.DockStyle.Top;
+            this.DefaultChampionInput.FormattingEnabled = true;
+            this.DefaultChampionInput.Items.AddRange(new object[] {
+            "YES",
+            "NO"});
+            this.DefaultChampionInput.Location = new System.Drawing.Point(3, 185);
+            this.DefaultChampionInput.Name = "DefaultChampionInput";
+            this.DefaultChampionInput.Size = new System.Drawing.Size(326, 21);
+            this.DefaultChampionInput.TabIndex = 15;
+            // 
+            // defaultChampionLabel
+            // 
+            this.defaultChampionLabel.AutoSize = true;
+            this.defaultChampionLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.defaultChampionLabel.Location = new System.Drawing.Point(3, 172);
+            this.defaultChampionLabel.Name = "defaultChampionLabel";
+            this.defaultChampionLabel.Size = new System.Drawing.Size(115, 13);
+            this.defaultChampionLabel.TabIndex = 14;
+            this.defaultChampionLabel.Text = "Default Champion Pick";
+            // 
+            // DefaultQueueInput
+            // 
+            this.DefaultQueueInput.Dock = System.Windows.Forms.DockStyle.Top;
+            this.DefaultQueueInput.FormattingEnabled = true;
+            this.DefaultQueueInput.Items.AddRange(new object[] {
+            "YES",
+            "NO"});
+            this.DefaultQueueInput.Location = new System.Drawing.Point(3, 219);
+            this.DefaultQueueInput.Name = "DefaultQueueInput";
+            this.DefaultQueueInput.Size = new System.Drawing.Size(326, 21);
+            this.DefaultQueueInput.TabIndex = 17;
+            // 
+            // defaultQueueLabel
+            // 
+            this.defaultQueueLabel.AutoSize = true;
+            this.defaultQueueLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.defaultQueueLabel.Location = new System.Drawing.Point(3, 206);
+            this.defaultQueueLabel.Name = "defaultQueueLabel";
+            this.defaultQueueLabel.Size = new System.Drawing.Size(103, 13);
+            this.defaultQueueLabel.TabIndex = 16;
+            this.defaultQueueLabel.Text = "Default Queue Type";
+            // 
+            // MaxBotsInput
+            // 
+            this.MaxBotsInput.Dock = System.Windows.Forms.DockStyle.Top;
+            this.MaxBotsInput.Location = new System.Drawing.Point(3, 253);
+            this.MaxBotsInput.Name = "MaxBotsInput";
+            this.MaxBotsInput.Size = new System.Drawing.Size(326, 20);
+            this.MaxBotsInput.TabIndex = 19;
+            // 
+            // maxBotsLabel
+            // 
+            this.maxBotsLabel.AutoSize = true;
+            this.maxBotsLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.maxBotsLabel.Location = new System.Drawing.Point(3, 240);
+            this.maxBotsLabel.Name = "maxBotsLabel";
+            this.maxBotsLabel.Size = new System.Drawing.Size(88, 13);
+            this.maxBotsLabel.TabIndex = 18;
+            this.maxBotsLabel.Text = "Max bots running";
+            // 
+            // MaxLevelInput
+            // 
+            this.MaxLevelInput.Dock = System.Windows.Forms.DockStyle.Top;
+            this.MaxLevelInput.Location = new System.Drawing.Point(3, 286);
+            this.MaxLevelInput.Name = "MaxLevelInput";
+            this.MaxLevelInput.Size = new System.Drawing.Size(326, 20);
+            this.MaxLevelInput.TabIndex = 21;
+            // 
+            // maxLevelLabel
+            // 
+            this.maxLevelLabel.AutoSize = true;
+            this.maxLevelLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.maxLevelLabel.Location = new System.Drawing.Point(3, 273);
+            this.maxLevelLabel.Name = "maxLevelLabel";
+            this.maxLevelLabel.Size = new System.Drawing.Size(52, 13);
+            this.maxLevelLabel.TabIndex = 20;
+            this.maxLevelLabel.Text = "Max level";
             // 
             // frm_MainWindow
             // 
@@ -435,9 +530,8 @@
             this.Controls.Add(this.mainWindowSplitContainer);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frm_MainWindow";
-            this.Text = "RitoBot GUI (c) BumeKappa";
+            this.Text = "RitoBot GUI";
             this.mainWindowSplitContainer.Panel1.ResumeLayout(false);
-            this.mainWindowSplitContainer.Panel1.PerformLayout();
             this.mainWindowSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.mainWindowSplitContainer)).EndInit();
             this.mainWindowSplitContainer.ResumeLayout(false);
@@ -480,6 +574,14 @@
         private System.Windows.Forms.Label spell1Label;
         private System.Windows.Forms.RichTextBox LoadedAccounts;
         private System.Windows.Forms.Label accountsLabel;
+        private System.Windows.Forms.TextBox MaxLevelInput;
+        private System.Windows.Forms.Label maxLevelLabel;
+        private System.Windows.Forms.TextBox MaxBotsInput;
+        private System.Windows.Forms.Label maxBotsLabel;
+        private System.Windows.Forms.ComboBox DefaultQueueInput;
+        private System.Windows.Forms.Label defaultQueueLabel;
+        private System.Windows.Forms.ComboBox DefaultChampionInput;
+        private System.Windows.Forms.Label defaultChampionLabel;
     }
 }
 
