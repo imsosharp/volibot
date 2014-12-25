@@ -66,7 +66,7 @@ namespace RitoBot
                     string[] contentlines = content.Split(separator, StringSplitOptions.None);
                     File.WriteAllLines(accountsTxtLocation, contentlines);
                 }
-                File.AppendAllText(accountsTxtLocation, content + Environment.NewLine);
+                else File.AppendAllText(accountsTxtLocation, content + Environment.NewLine);
             }
             catch (Exception e)
             {

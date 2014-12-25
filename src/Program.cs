@@ -82,42 +82,45 @@ namespace RitoBot
             ReloadAccounts:
             loadAccounts();
             int curRunning = 0;
-            if (LoadGUI) Application.Run(MainWindow); //MainWindow.ShowDialog();
-            foreach (string acc in accounts)
+            if (LoadGUI) MainWindow.ShowDialog();
+            if (!LoadGUI)
             {
-                try
+                foreach (string acc in accounts)
                 {
-                    accounts2.RemoveAt(0);
-                    string Accs = acc;
-                    string[] stringSeparators = new string[] { "|" };
-                    var result = Accs.Split(stringSeparators, StringSplitOptions.None);
-                    curRunning += 1;
-                    if (result[0].Contains("username"))
+                    try
                     {
-                        Console.WriteLine("Please add your accounts into config\\accounts.txt");
-                        goto ReloadAccounts;
+                        accounts2.RemoveAt(0);
+                        string Accs = acc;
+                        string[] stringSeparators = new string[] { "|" };
+                        var result = Accs.Split(stringSeparators, StringSplitOptions.None);
+                        curRunning += 1;
+                        if (result[0].Contains("username"))
+                        {
+                            Console.WriteLine("Please add your accounts into config\\accounts.txt");
+                            goto ReloadAccounts;
+                        }
+                        if (result[2] != null)
+                        {
+                            QueueTypes queuetype = (QueueTypes)System.Enum.Parse(typeof(QueueTypes), result[2]);
+                            RiotBot ritoBot = new RiotBot(result[0], result[1], Region, Path2, curRunning, queuetype);
+                        }
+                        else
+                        {
+                            QueueTypes queuetype = QueueTypes.ARAM;
+                            RiotBot ritoBot = new RiotBot(result[0], result[1], Region, Path2, curRunning, queuetype);
+                        }
+                        Console.Title = "RitoBot Console | Currently connected: " + connectedAccs;
+                        if (curRunning == maxBots)
+                            break;
                     }
-                    if (result[2] != null)
+                    catch (Exception)
                     {
-                        QueueTypes queuetype = (QueueTypes)System.Enum.Parse(typeof(QueueTypes), result[2]);
-                        RiotBot ritoBot = new RiotBot(result[0], result[1], Region, Path2, curRunning, queuetype);
+                        Console.WriteLine("CountAccError: You may have an issue in your accounts.txt");
+                        Application.Exit();
                     }
-                    else
-                    {
-                        QueueTypes queuetype = QueueTypes.ARAM;
-                        RiotBot ritoBot = new RiotBot(result[0], result[1], Region, Path2, curRunning, queuetype);
-                    }
-                    Console.Title = " Current Connected: " + connectedAccs;
-                    if (curRunning == maxBots)
-                        break;
                 }
-                catch (Exception)
-                {
-                    Console.WriteLine("CountAccError: You may have an issue in your accounts.txt");
-                    Application.Exit();
-                }
+                Console.ReadKey();
             }
-            Console.ReadKey();
         }
         public static void loadVersion()
         {
@@ -148,7 +151,7 @@ namespace RitoBot
                     QueueTypes queuetype = QueueTypes.ARAM;
                     RiotBot ritoBot = new RiotBot(result[0], result[1], Region, Path2, curRunning, queuetype);
                 }
-                Console.Title = " Current Connected: " + connectedAccs;
+                Console.Title = "RitoBot Console | Currently connected: " + connectedAccs;
                 if (curRunning == maxBots)
                     break;
             }
