@@ -394,14 +394,16 @@ namespace RitoBot
        
         private void updateStatus(string status, string accname)
         {
-            if (Program.LoadGUI) Program.MainWindow.Print(string.Concat(new object[4]
+            if (Program.OfficialGUI) Program.MainWindow.Print(string.Concat(new object[4]
               {     
                 (object) "[",
                 (object) accname,
                 (object) "]: ",
                 (object) status
               }));
-            Console.WriteLine(string.Concat(new object[7]
+            if (!Program.OfficialGUI)
+            {
+                Console.WriteLine(string.Concat(new object[7]
               {
                 (object) "[",
                 (object) DateTime.Now,
@@ -411,6 +413,7 @@ namespace RitoBot
                 (object) "]: ",
                 (object) status
               }));
+            }
         }        
         
         private async void RegisterNotifications()

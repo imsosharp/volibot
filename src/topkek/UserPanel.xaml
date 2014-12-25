@@ -1,0 +1,58 @@
+﻿<!-- Topkek's AutoQueuer is part of the opensource VoliBot AutoQueuer project.
+     Credits to: shalzuth, Maufeat, imsosharp
+     Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
+     http://joduska.me/
+     You are allowed to copy, edit and distribute this project,
+     as long as you don't touch this notice and you release your project with source. -->
+    <UserControl x:Class="RitoBot.topkek.UserPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="295" Width="496">
+    <Grid Margin="0,-29,-28,-83">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="411*"/>
+            <ColumnDefinition Width="113*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Champion" HorizontalAlignment="Left" Margin="223,15,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.474,0" Height="27"/>
+        <TextBox x:Name="champion" HorizontalAlignment="Left" Height="23" Margin="200,42,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <ComboBox x:Name="queueType1" HorizontalAlignment="Left" Margin="200,107,0,0" VerticalAlignment="Top" Width="120" IsReadOnly="True" IsEditable="True">
+            <ComboBoxItem Content="ARAM" IsSelected="True"/>
+            <ComboBoxItem Content="INTRO_BOT"/>
+            <ComboBoxItem Content="BEGINNER_BOT"/>
+            <ComboBoxItem Content="MEDIUM_BOT"/>
+            <ComboBoxItem Content="NORMAL_5x5"/>
+            <ComboBoxItem Content="NORMAL_3x3"/>
+        </ComboBox>
+        <Label Content="Queue type" HorizontalAlignment="Left" Margin="223,78,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.474,0" Height="29"/>
+        <CheckBox Content="Botting mode" HorizontalAlignment="Left" Margin="270,157,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="summNameLabel" Content="Name: " HorizontalAlignment="Left" Margin="16,51,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.184,-0.038" Width="122"/>
+        <Label x:Name="summLvlLabel" Content="Lvl: " HorizontalAlignment="Left" Margin="34,72,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.184,-0.038" Width="48"/>
+        <Label x:Name="summIPLabel" Content="IP:" HorizontalAlignment="Left" Margin="37,91,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.184,-0.038" Width="101"/>
+        <Label x:Name="loggedName" Content="Account: " HorizontalAlignment="Left" Margin="5,31,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.184,-0.038" Width="133"/>
+        <GroupBox Header="Summoner's info" HorizontalAlignment="Left" Height="117" Margin="-9,2,0,0" VerticalAlignment="Top" Width="134"/>
+        <ComboBox x:Name="spell1" HorizontalAlignment="Left" Margin="342,42,0,0" VerticalAlignment="Top" Width="120" IsReadOnly="True" IsEditable="True" Grid.ColumnSpan="2">
+            <ComboBoxItem Content="Heal" IsSelected="True"/>
+            <ComboBoxItem Content="Flash"/>
+            <ComboBoxItem Content="Ghost"/>
+            <ComboBoxItem Content="Barrier"/>
+            <ComboBoxItem Content="Exhaust"/>
+            <ComboBoxItem Content="Clairvoyance"/>
+        </ComboBox>
+        <ComboBox x:Name="spell2" HorizontalAlignment="Left" Margin="342,107,0,0" VerticalAlignment="Top" Width="120" IsReadOnly="True" IsEditable="True" Grid.ColumnSpan="2">
+            <ComboBoxItem Content="Revive" IsSelected="True"/>
+            <ComboBoxItem Content="Teleport"/>
+            <ComboBoxItem Content="Smite"/>
+            <ComboBoxItem Content="Cleanse"/>
+            <ComboBoxItem Content="Ignite"/>
+            <ComboBoxItem Content="Clarity"/>
+        </ComboBox>
+        <Label Content="Spell1&#xD;&#xA;" HorizontalAlignment="Left" Margin="380,15,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.474,0" Height="27" Grid.ColumnSpan="2"/>
+        <Label Content="Spell2&#xA;" HorizontalAlignment="Left" Margin="380,80,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.474,0" Height="27" Grid.ColumnSpan="2"/>
+        <Button x:Name="QueueUP" Content="Queue UP!" HorizontalAlignment="Left" Margin="270,203,0,0" VerticalAlignment="Top" Width="97" Height="33" Click="QueueUP_Click"/>
+        <Border BorderBrush="#FF0E94E0" BorderThickness="1" HorizontalAlignment="Left" Height="177" Margin="169,10,0,0" VerticalAlignment="Top" Width="324" Grid.ColumnSpan="2"/>
+        <Label x:Name="statusLabel" Content="Setting up..." HorizontalAlignment="Left" Margin="280,241,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.184,-0.462"/>
+    </Grid>
+</UserControl>
