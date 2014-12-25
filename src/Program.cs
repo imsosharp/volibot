@@ -80,6 +80,14 @@ namespace RitoBot
             {
                 try
                 {
+
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Topkek's AutoQueuer loaded.");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.WriteLine("---------imsosharp---------");
                     var app = new RitoBot.topkek.App();
                     app.InitializeComponent();
                     app.Run();
