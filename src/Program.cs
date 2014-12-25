@@ -36,7 +36,7 @@ namespace RitoBot
         public static string spell2 = "ignite";
         public static string cversion = "4.21.14_12_08_11_36";
         public static bool AutoUpdate = false;
-        public static bool LoadGUI = true;
+        public static bool LoadGUI = false;
         public static frm_MainWindow MainWindow = new frm_MainWindow();
 
         static void Main(string[] args)
@@ -70,6 +70,7 @@ namespace RitoBot
             }
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(getTimestamp() + "Loading config\\accounts.txt");
+            ReloadAccounts:
             loadAccounts();
             int curRunning = 0;
             if (LoadGUI) MainWindow.ShowDialog();
@@ -82,6 +83,11 @@ namespace RitoBot
                     string[] stringSeparators = new string[] { "|" };
                     var result = Accs.Split(stringSeparators, StringSplitOptions.None);
                     curRunning += 1;
+                    if (result[0].Contains("user"))
+                    {
+                        Console.WriteLine("Please add your accounts into config\\accounts.txt");
+                        goto ReloadAccounts;
+                    }
                     if (result[2] != null)
                     {
                         QueueTypes queuetype = (QueueTypes)System.Enum.Parse(typeof(QueueTypes), result[2]);
@@ -239,7 +245,7 @@ namespace RitoBot
                 
                 var newfile = File.Create(configTxtLocation);
                 newfile.Close();
-                var content = "[General]\nLauncherPath=C:\\Riot Games\\League of Legends\\\nLoadGUI=true\nMaxBots=1\nMaxLevel=31\nChampionPick=Annie\nSpell1=Flash\nSpell2=Exhaust\nRndSpell=false\nReplaceConfig=false\nAutoUpdate=false\n\n[Account]\nRegion=EUW\nBuyBoost=false";
+                var content = "[General]\nLauncherPath=C:\\Riot Games\\League of Legends\\\nLoadGUI=false\nMaxBots=1\nMaxLevel=31\nChampionPick=Annie\nSpell1=Flash\nSpell2=Exhaust\nRndSpell=false\nReplaceConfig=false\nAutoUpdate=false\n\n[Account]\nRegion=EUW\nBuyBoost=false";
                 var separator = new string[] { "\n" };
                 string[] contentlines = content.Split(separator,StringSplitOptions.None);
                 File.WriteAllLines(configTxtLocation, contentlines);
