@@ -194,7 +194,7 @@ namespace RitoBot
                 case "SONA":
                     return 37;
                 case "SORAKA":
-                    return 37;
+                    return 16;
                 case "SWAIN":
                     return 50;
                 case "SYNDRA":
