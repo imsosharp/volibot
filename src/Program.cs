@@ -82,7 +82,7 @@ namespace RitoBot
             ReloadAccounts:
             loadAccounts();
             int curRunning = 0;
-            if (LoadGUI) MainWindow.ShowDialog();
+            if (LoadGUI) Application.Run(MainWindow); //MainWindow.ShowDialog();
             foreach (string acc in accounts)
             {
                 try
@@ -92,7 +92,7 @@ namespace RitoBot
                     string[] stringSeparators = new string[] { "|" };
                     var result = Accs.Split(stringSeparators, StringSplitOptions.None);
                     curRunning += 1;
-                    if (result[0].Contains("user"))
+                    if (result[0].Contains("username"))
                     {
                         Console.WriteLine("Please add your accounts into config\\accounts.txt");
                         goto ReloadAccounts;

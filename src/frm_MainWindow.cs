@@ -84,6 +84,10 @@ namespace RitoBot
                     string[] stringSeparators = new string[] { "|" };
                     var result = Accs.Split(stringSeparators, StringSplitOptions.None);
                     curRunning += 1;
+                    if (result[0].Contains("username"))
+                    {
+                        Console.WriteLine("Please add an account.");
+                    }
                     if (result[2] != null)
                     {
                         QueueTypes queuetype = (QueueTypes)System.Enum.Parse(typeof(QueueTypes), result[2]);
