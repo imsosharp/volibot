@@ -613,7 +613,7 @@ namespace RitoBot
                 updateStatus("Bought 'XP Boost: 3 Days'!", Accountname);
                 httpClient.Dispose();
             }
-            catch (Exception e)
+            catch (NullReferenceException e)
             {
                 Console.WriteLine(e);
             }
