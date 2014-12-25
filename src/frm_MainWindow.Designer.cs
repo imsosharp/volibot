@@ -1,3 +1,12 @@
+/*
+ * VoliBot GUI a.k.a. RitoBot GUI is part of the opensource VoliBot AutoQueuer project.
+ * Credits to: shalzuth, Maufeat, imsosharp
+ * Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
+ * http://www.joduska.me/
+ * You are allowed to copy, edit and distribute this project,
+ * as long as you don't touch this notice and you release your project with source.
+ */
+
 namespace RitoBot
 {
     partial class frm_MainWindow
@@ -139,6 +148,130 @@ namespace RitoBot
             // 
             this.SelectChampionInput.Dock = System.Windows.Forms.DockStyle.Top;
             this.SelectChampionInput.FormattingEnabled = true;
+            this.SelectChampionInput.Items.AddRange(new object[] {
+            "AATROX",
+            "AHRI",
+            "AKALI",
+            "ALISTAR",
+            "AMUMU",
+            "ANIVIA",
+            "ANNIE",
+            "ASHE",
+            "AZIR",
+            "BLITZCRANK",
+            "BRAND",
+            "BRAUM",
+            "CAITLYN",
+            "CASSIOPEIA",
+            "CHOGATH",
+            "CORKI",
+            "DARIUS",
+            "DIANA",
+            "MUNDO",
+            "DRAVEN",
+            "ELISE",
+            "EVELYNN",
+            "EZREAL",
+            "FIDDLESTICKS",
+            "FIORA",
+            "FIZZ",
+            "GALIO",
+            "GANGPLANK",
+            "GAREN",
+            "GNAR",
+            "GRAGAS",
+            "GRAVES",
+            "HECARIM",
+            "HEIMERDIGER",
+            "IRELIA",
+            "JANNA",
+            "JARVAN",
+            "JAX",
+            "JAYCE",
+            "JINX",
+            "KALISTA",
+            "KARMA",
+            "KARTHUS",
+            "KASSADIN",
+            "KATARINA",
+            "KAYLE",
+            "KENNEN",
+            "KHAZIX",
+            "KOGMAW",
+            "LEBLANC",
+            "LEESIN",
+            "LEONA",
+            "LISSANDRA",
+            "LUCIAN",
+            "LULU",
+            "LUX",
+            "MALPHITE",
+            "MALZAHAR",
+            "MAOKAI",
+            "MASTERYI",
+            "MISSFORTUNE",
+            "MORDEKAISER",
+            "MORGANA",
+            "NAMI",
+            "NASUS",
+            "NAUTILUS",
+            "NIDALEE",
+            "NOCTURNE",
+            "NUNU",
+            "OLAF",
+            "ORIANNA",
+            "PANTHEON",
+            "POPPY",
+            "QUINN",
+            "REKSAI",
+            "RAMMUS",
+            "RENEKTON",
+            "RENGAR",
+            "RIVEN",
+            "RUMBLE",
+            "RYZE",
+            "SEJUANI",
+            "SHACO",
+            "SHEN",
+            "SHYVANA",
+            "SINGED",
+            "SION",
+            "SIVIR",
+            "SKARNER",
+            "SONA",
+            "SORAKA",
+            "SWAIN",
+            "SYNDRA",
+            "TALON",
+            "TARIC",
+            "TEEMO",
+            "THRESH",
+            "TRISTANA",
+            "TRUNDLE",
+            "TRYNDAMERE",
+            "TWISTEDFATE",
+            "TWITCH",
+            "UDYR",
+            "URGOT",
+            "VARUS",
+            "VAYNE",
+            "VEIGAR",
+            "VELKOZ",
+            "VI",
+            "VIKTOR",
+            "VLADIMIR",
+            "VOLIBEAR",
+            "WARWICK",
+            "WUKONG",
+            "XERATH",
+            "XINZHAO",
+            "YASUO",
+            "YORICK",
+            "ZAC",
+            "ZED",
+            "ZIGGS",
+            "ZILEAN",
+            "ZYRA"});
             this.SelectChampionInput.Location = new System.Drawing.Point(3, 116);
             this.SelectChampionInput.Name = "SelectChampionInput";
             this.SelectChampionInput.Size = new System.Drawing.Size(331, 21);
@@ -148,7 +281,7 @@ namespace RitoBot
             // 
             this.accountsLabel.AutoSize = true;
             this.accountsLabel.ForeColor = System.Drawing.Color.Black;
-            this.accountsLabel.Location = new System.Drawing.Point(4, 186);
+            this.accountsLabel.Location = new System.Drawing.Point(-2, 186);
             this.accountsLabel.Name = "accountsLabel";
             this.accountsLabel.Size = new System.Drawing.Size(52, 13);
             this.accountsLabel.TabIndex = 2;
@@ -169,16 +302,12 @@ namespace RitoBot
             this.QueueTypeInput.Dock = System.Windows.Forms.DockStyle.Top;
             this.QueueTypeInput.FormattingEnabled = true;
             this.QueueTypeInput.Items.AddRange(new object[] {
-            "ARAM",
             "NORMAL_5x5",
             "NORMAL_3x3",
-            "DOMINION_NORMAL_5x5",
-            "DOMINION_BEGINNER_BOT",
             "INTRO_BOT",
             "BEGINNER_BOT",
             "MEDIUM_BOT",
-            "TT_BEGINNER_BOT",
-            "RANKED_SOLO_5x5"});
+            "ARAM"});
             this.QueueTypeInput.Location = new System.Drawing.Point(3, 82);
             this.QueueTypeInput.Name = "QueueTypeInput";
             this.QueueTypeInput.Size = new System.Drawing.Size(331, 21);
@@ -196,9 +325,9 @@ namespace RitoBot
             // 
             // addAccountsBtn
             // 
-            this.addAccountsBtn.Location = new System.Drawing.Point(0, 160);
+            this.addAccountsBtn.Location = new System.Drawing.Point(2, 160);
             this.addAccountsBtn.Name = "addAccountsBtn";
-            this.addAccountsBtn.Size = new System.Drawing.Size(326, 23);
+            this.addAccountsBtn.Size = new System.Drawing.Size(335, 23);
             this.addAccountsBtn.TabIndex = 4;
             this.addAccountsBtn.Text = "Add New Account";
             this.addAccountsBtn.UseVisualStyleBackColor = true;
@@ -311,8 +440,12 @@ namespace RitoBot
             this.DefaultQueueInput.Dock = System.Windows.Forms.DockStyle.Top;
             this.DefaultQueueInput.FormattingEnabled = true;
             this.DefaultQueueInput.Items.AddRange(new object[] {
-            "YES",
-            "NO"});
+            "NORMAL_5x5",
+            "NORMAL_3x3",
+            "INTRO_BOT",
+            "BEGINNER_BOT",
+            "MEDIUM_BOT",
+            "ARAM"});
             this.DefaultQueueInput.Location = new System.Drawing.Point(3, 219);
             this.DefaultQueueInput.Name = "DefaultQueueInput";
             this.DefaultQueueInput.Size = new System.Drawing.Size(331, 21);
@@ -333,8 +466,129 @@ namespace RitoBot
             this.DefaultChampionInput.Dock = System.Windows.Forms.DockStyle.Top;
             this.DefaultChampionInput.FormattingEnabled = true;
             this.DefaultChampionInput.Items.AddRange(new object[] {
-            "YES",
-            "NO"});
+            "AATROX",
+            "AHRI",
+            "AKALI",
+            "ALISTAR",
+            "AMUMU",
+            "ANIVIA",
+            "ANNIE",
+            "ASHE",
+            "AZIR",
+            "BLITZCRANK",
+            "BRAND",
+            "BRAUM",
+            "CAITLYN",
+            "CASSIOPEIA",
+            "CHOGATH",
+            "CORKI",
+            "DARIUS",
+            "DIANA",
+            "MUNDO",
+            "DRAVEN",
+            "ELISE",
+            "EVELYNN",
+            "EZREAL",
+            "FIDDLESTICKS",
+            "FIORA",
+            "FIZZ",
+            "GALIO",
+            "GANGPLANK",
+            "GAREN",
+            "GNAR",
+            "GRAGAS",
+            "GRAVES",
+            "HECARIM",
+            "HEIMERDIGER",
+            "IRELIA",
+            "JANNA",
+            "JARVAN",
+            "JAX",
+            "JAYCE",
+            "JINX",
+            "KALISTA",
+            "KARMA",
+            "KARTHUS",
+            "KASSADIN",
+            "KATARINA",
+            "KAYLE",
+            "KENNEN",
+            "KHAZIX",
+            "KOGMAW",
+            "LEBLANC",
+            "LEESIN",
+            "LEONA",
+            "LISSANDRA",
+            "LUCIAN",
+            "LULU",
+            "LUX",
+            "MALPHITE",
+            "MALZAHAR",
+            "MAOKAI",
+            "MASTERYI",
+            "MISSFORTUNE",
+            "MORDEKAISER",
+            "MORGANA",
+            "NAMI",
+            "NASUS",
+            "NAUTILUS",
+            "NIDALEE",
+            "NOCTURNE",
+            "NUNU",
+            "OLAF",
+            "ORIANNA",
+            "PANTHEON",
+            "POPPY",
+            "QUINN",
+            "REKSAI",
+            "RAMMUS",
+            "RENEKTON",
+            "RENGAR",
+            "RIVEN",
+            "RUMBLE",
+            "RYZE",
+            "SEJUANI",
+            "SHACO",
+            "SHEN",
+            "SHYVANA",
+            "SINGED",
+            "SION",
+            "SIVIR",
+            "SKARNER",
+            "SONA",
+            "SORAKA",
+            "SWAIN",
+            "SYNDRA",
+            "TALON",
+            "TARIC",
+            "TEEMO",
+            "THRESH",
+            "TRISTANA",
+            "TRUNDLE",
+            "TRYNDAMERE",
+            "TWISTEDFATE",
+            "TWITCH",
+            "UDYR",
+            "URGOT",
+            "VARUS",
+            "VAYNE",
+            "VEIGAR",
+            "VELKOZ",
+            "VI",
+            "VIKTOR",
+            "VLADIMIR",
+            "VOLIBEAR",
+            "WARWICK",
+            "WUKONG",
+            "XERATH",
+            "XINZHAO",
+            "YASUO",
+            "YORICK",
+            "ZAC",
+            "ZED",
+            "ZIGGS",
+            "ZILEAN",
+            "ZYRA"});
             this.DefaultChampionInput.Location = new System.Drawing.Point(3, 185);
             this.DefaultChampionInput.Name = "DefaultChampionInput";
             this.DefaultChampionInput.Size = new System.Drawing.Size(331, 21);
@@ -401,16 +655,19 @@ namespace RitoBot
             this.Spell2Input.Dock = System.Windows.Forms.DockStyle.Top;
             this.Spell2Input.FormattingEnabled = true;
             this.Spell2Input.Items.AddRange(new object[] {
-            "NA",
-            "EUW",
-            "EUNE",
-            "OCE",
-            "LAN",
-            "LAS",
-            "BR",
-            "TR",
-            "RU",
-            "QQ"});
+            "BARRIER",
+            "CLAIRVOYANCE",
+            "CLARITY",
+            "CLEANSE",
+            "EXHAUST",
+            "FLASH",
+            "GARRISON",
+            "GHOST",
+            "HEAL",
+            "IGNITE",
+            "REVIVE",
+            "SMITE",
+            "TELEPORT"});
             this.Spell2Input.Location = new System.Drawing.Point(3, 117);
             this.Spell2Input.Name = "Spell2Input";
             this.Spell2Input.Size = new System.Drawing.Size(331, 21);
@@ -431,16 +688,19 @@ namespace RitoBot
             this.Spell1Input.Dock = System.Windows.Forms.DockStyle.Top;
             this.Spell1Input.FormattingEnabled = true;
             this.Spell1Input.Items.AddRange(new object[] {
-            "NA",
-            "EUW",
-            "EUNE",
-            "OCE",
-            "LAN",
-            "LAS",
-            "BR",
-            "TR",
-            "RU",
-            "QQ"});
+            "BARRIER",
+            "CLAIRVOYANCE",
+            "CLARITY",
+            "CLEANSE",
+            "EXHAUST",
+            "FLASH",
+            "GARRISON",
+            "GHOST",
+            "HEAL",
+            "IGNITE",
+            "REVIVE",
+            "SMITE",
+            "TELEPORT"});
             this.Spell1Input.Location = new System.Drawing.Point(3, 83);
             this.Spell1Input.Name = "Spell1Input";
             this.Spell1Input.Size = new System.Drawing.Size(331, 21);
@@ -527,7 +787,6 @@ namespace RitoBot
             this.ClientSize = new System.Drawing.Size(1040, 476);
             this.Controls.Add(this.mainWindowSplitContainer);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frm_MainWindow";
             this.Text = "RitoBot GUI";

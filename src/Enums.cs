@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*
+ * Enums.cs is part of the opensource VoliBot AutoQueuer project.
+ * Credits to: shalzuth, Maufeat, imsosharp
+ * Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
+ * http://www.joduska.me/
+ * You are allowed to copy, edit and distribute this project,
+ * as long as you don't touch this notice and you release your project with source.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +17,25 @@ namespace RitoBot
 {
     class Enums
     {
-
+        public static object[] champions = new object[] { 
+            "AATROX", "AHRI", "AKALI", "ALISTAR", "AMUMU", "ANIVIA", "ANNIE", "ASHE", "AZIR", "BLITZCRANK", "BRAND", "BRAUM", "CAITLYN", "CASSIOPEIA", "CHOGATH", "CORKI",
+"DARIUS", "DIANA", "MUNDO", "DRAVEN", "ELISE", "EVELYNN", "EZREAL", "FIDDLESTICKS", "FIORA", "FIZZ", "GALIO", "GANGPLANK", "GAREN", "GNAR", "GRAGAS", "GRAVES",
+"HECARIM", "HEIMERDIGER", "IRELIA", "JANNA", "JARVAN", "JAX", "JAYCE", "JINX", "KALISTA", "KARMA", "KARTHUS", "KASSADIN", "KATARINA", "KAYLE", "KENNEN",
+"KHAZIX", "KOGMAW", "LEBLANC", "LEESIN", "LEONA", "LISSANDRA", "LUCIAN", "LULU", "LUX", "MALPHITE", "MALZAHAR", "MAOKAI", "MASTERYI", "MISSFORTUNE",
+"MORDEKAISER", "MORGANA", "NAMI", "NASUS", "NAUTILUS", "NIDALEE", "NOCTURNE", "NUNU", "OLAF", "ORIANNA", "PANTHEON", "POPPY", "QUINN", "REKSAI", "RAMMUS",
+"RENEKTON", "RENGAR", "RIVEN", "RUMBLE", "RYZE", "SEJUANI", "SHACO", "SHEN", "SHYVANA", "SINGED", "SION", "SIVIR", "SKARNER", "SONA", "SORAKA", "SWAIN",
+"SYNDRA", "TALON", "TARIC", "TEEMO", "THRESH", "TRISTANA", "TRUNDLE", "TRYNDAMERE", "TWISTEDFATE", "TWITCH", "UDYR", "URGOT", "VARUS", "VAYNE", "VEIGAR",
+"VELKOZ", "VI", "VIKTOR", "VLADIMIR", "VOLIBEAR", "WARWICK", "WUKONG", "XERATH", "XINZHAO", "YASUO", "YORICK", "ZAC", "ZED", "ZIGGS", "ZILEAN", "ZYRA"
+        };
+        public static object[] queues = new object[] {
+            "NORMAL_5x5", "NORMAL_3x3", "INTRO_BOT", "BEGINNER_BOT", "MEDIUM_BOT", "ARAM"
+        };
+        public static object[] regions = new object[] {
+            "NA", "EUW", "EUNE", "OCE", "LAN", "LAS", "BR", "TR", "RU", "QQ"
+        };
+        public static object[] spells = new object[] {
+            "BARRIER", "CLAIRVOYANCE", "CLARITY", "CLEANSE", "EXHAUST", "FLASH", "GARRISON", "GHOST", "HEAL", "IGNITE", "REVIVE", "SMITE", "TELEPORT"
+        };
         public static int championToId(string name)
         {
             switch (name)
@@ -119,7 +146,7 @@ namespace RitoBot
                     return 89;
                 case "LISSANDRA":
                     return 127;
-                case "LUCIN":
+                case "LUCIAN":
                     return 236;
                 case "LULU":
                     return 117;

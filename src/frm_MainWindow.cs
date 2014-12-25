@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*
+ * VoliBot GUI a.k.a. RitoBot GUI is part of the opensource VoliBot AutoQueuer project.
+ * Credits to: shalzuth, Maufeat, imsosharp
+ * Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
+ * http://www.joduska.me/
+ * You are allowed to copy, edit and distribute this project,
+ * as long as you don't touch this notice and you release your project with source.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,8 +25,8 @@ namespace RitoBot
         public frm_MainWindow()
         {
             InitializeComponent();
-            Print("GUI Version of Volibot loaded successfuly!");
-            Print("Volibot version: " + Program.cversion);
+            Print("VoliBot GUI RC1 Loaded.");
+            Print("Volibot's ready for Version: " + Program.cversion.Substring(0,4));
             Print("brought to you by imsosharp.", 4);
         }
 
@@ -40,12 +49,21 @@ namespace RitoBot
 
         private void addAccountsBtn_Click(object sender, EventArgs e)
         {
-            
+            if (newUserNameInput.Text.Length == 0 || newPasswordInput.Text.Length == 0)
+            {
+                MessageBox.Show("Username and Password cannot be empty!!!");
+            }
+            else
+            {
+                if (QueueTypeInput.SelectedIndex == -1 && SelectChampionInput.SelectedIndex == -1) FileHandlers.AccountsTxt(newUserNameInput.Text, newPasswordInput.Text);
+                else if (SelectChampionInput.SelectedIndex == -1) FileHandlers.AccountsTxt(newUserNameInput.Text, newPasswordInput.Text, QueueTypeInput.SelectedItem.ToString());
+                else FileHandlers.AccountsTxt(newUserNameInput.Text, newPasswordInput.Text, QueueTypeInput.SelectedItem.ToString(), SelectChampionInput.SelectedItem.ToString());
+            }
         }
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
-            Print("NOT YET IMPLEMENTED!");
+            FileHandlers.SettingsIni(LauncherPathInput.Text, MaxBotsInput.Text, MaxLevelInput.Text, DefaultChampionInput.SelectedItem.ToString(), Spell1Input.SelectedItem.ToString(), Spell2Input.SelectedItem.ToString(), RegionInput.SelectedItem.ToString(), BuyBoostInput.SelectedItem.ToString());
         }
 
         private void replaceConfigBtn_Click(object sender, EventArgs e)
@@ -56,9 +74,9 @@ namespace RitoBot
 
         private void queueLoop()
         {
-            int curRunning = 0;
             foreach (string acc in Program.accounts)
             {
+                int curRunning = 0;
                 try
                 {
                     Program.accounts2.RemoveAt(0);
@@ -78,7 +96,7 @@ namespace RitoBot
                         RiotBot ritoBot = new RiotBot(result[0], result[1], Program.Region, Program.Path2, curRunning, queuetype);
                         ShowAccount(result[0], result[1], "ARAM");
                     }
-                    Program.MainWindow.Text = " Current Connected: " + curRunning;
+                    Program.MainWindow.Text = " Volibot GUI | Currently connected: " + Program.connectedAccs;
                     if (curRunning == Program.maxBots)
                         break;
                 }
