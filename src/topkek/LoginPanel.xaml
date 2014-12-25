@@ -37,7 +37,7 @@
             <Label Content="Server:" HorizontalAlignment="Left" Margin="78,110,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.842,0.346" Grid.Column="1"/>
             <Label x:Name="Status" Content="Waiting for data.." HorizontalAlignment="Left" Margin="56,256,0,0" VerticalAlignment="Top" Width="131" Grid.Column="1"/>
             <Label Content="Game's version" HorizontalAlignment="Left" Margin="56,162,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.842,0.346" Grid.Column="1"/>
-            <TextBox x:Name="gamesversion" Grid.Column="1" HorizontalAlignment="Left" Height="20" Margin="43,188,0,0" TextWrapping="Wrap" Text="4.21.14_12_08_11_36" VerticalAlignment="Top" Width="120"/>
+            <TextBox x:Name="gamesversion" Grid.Column="1" HorizontalAlignment="Left" Height="20" Margin="43,188,0,0" TextWrapping="Wrap" Text="4.21" VerticalAlignment="Top" Width="120"/>
             <Label Content="kek!" Grid.Column="1" HorizontalAlignment="Left" Margin="318,260,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.575,0.525" Width="33"/>
         </Grid>
     </StackPanel>

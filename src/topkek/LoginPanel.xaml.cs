@@ -70,6 +70,7 @@ namespace RitoBot.topkek
         public LoginPanel()
         {
             InitializeComponent();
+            gamesversion.Text = Program.cversion;
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
