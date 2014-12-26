@@ -374,16 +374,7 @@ namespace RitoBot.topkek
         private void updateStatus(string text, string acc)
         {
 
-            KekHandler.changeStatus(string.Concat(new object[7]
-              {
-                (object) "[",
-                (object) DateTime.Now,
-                (object) "] ",        
-                (object) "[",
-                (object) acc,
-                (object) "]: ",
-                (object) text
-              }));
+            KekHandler.changeStatus(text);
         }
 
 
