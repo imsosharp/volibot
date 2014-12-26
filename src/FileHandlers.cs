@@ -36,7 +36,7 @@ namespace RitoBot
 
                 var newfile = File.Create(configTxtLocation);
                 newfile.Close();
-                var content = "[General]\nLauncherPath=" + LauncherPath + "\nOfficialGUI=true\nTopkekGUI=false\nMaxBots=" + MaxBots + "\nMaxLevel=" + MaxLevel + "\nChampionPick=" + ChampionPick + "\nSpell1=" + Spell1 + "\nSpell2=" + Spell2 + "\nRndSpell=false\nReplaceConfig=false\nAutoUpdate=false\n\n[Account]\nRegion=" + Region + "\nBuyBoost=" + BuyBoost;
+                var content = "[General]\nLauncherPath=" + LauncherPath + "\nLoadGUI=false\nMaxBots=" + MaxBots + "\nMaxLevel=" + MaxLevel + "\nChampionPick=" + ChampionPick + "\nSpell1=" + Spell1 + "\nSpell2=" + Spell2 + "\nRndSpell=false\nReplaceConfig=false\nAutoUpdate=false\n\n[Account]\nRegion=" + Region + "\nBuyBoost=" + BuyBoost;
                 var separator = new string[] { "\n" };
                 string[] contentlines = content.Split(separator, StringSplitOptions.None);
                 File.WriteAllLines(configTxtLocation, contentlines);

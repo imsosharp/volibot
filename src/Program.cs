@@ -15,14 +15,10 @@ using Ini;
 using System.Collections;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Net;
 using System.Management;
 using LoLLauncher;
 using System.Windows.Forms;
-using RitoBot.topkek;
-using System.Xaml;
-using w = System.Windows;
 
 namespace RitoBot
 {
@@ -50,17 +46,12 @@ namespace RitoBot
         public static string cversion = "4.21.14_12_08_11_36";
         public static bool AutoUpdate = false;
         public static bool LoadGUI = false;
-        public static bool OfficialGUI = false;
-        public static bool TopKekGUI = false;
         public static frm_MainWindow MainWindow = new frm_MainWindow();
 
-        [STAThread]
         static void Main(string[] args)
         {
-
             InitChecks();
             loadVersion();
-            
             Console.Title = "Volibot";
             Console.ForegroundColor = ConsoleColor.Green;
             Console.SetWindowSize(Console.WindowWidth + 5, Console.WindowHeight);
@@ -72,33 +63,6 @@ namespace RitoBot
             Console.WriteLine();
             Console.WriteLine(getTimestamp() + "Loading config\\settings.ini");
             loadConfiguration();
-            if (OfficialGUI && TopKekGUI)
-            {
-                TopKekGUI = false;
-            }
-            if (TopKekGUI)
-            {
-                try
-                {
-
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.WriteLine("TOPKEK'S AUTOQUEUER LOADED.");
-                    Console.Title = "TOPKEK'S AUTOQUEUER";
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.BackgroundColor = ConsoleColor.White;
-                    Console.WriteLine("----------IMSOKEK----------");
-                    var app = new RitoBot.topkek.App();
-                    app.InitializeComponent();
-                    app.Run();
-
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.ToString());
-                }
-            }
             if (replaceConfig)
             {
                 Console.WriteLine(getTimestamp() + "Replacing Config");
@@ -118,8 +82,8 @@ namespace RitoBot
             ReloadAccounts:
             loadAccounts();
             int curRunning = 0;
-            if (OfficialGUI) MainWindow.ShowDialog();
-            if (!OfficialGUI || !TopKekGUI)
+            if (LoadGUI) MainWindow.ShowDialog();
+            if (!LoadGUI)
             {
                 foreach (string acc in accounts)
                 {
@@ -199,8 +163,7 @@ namespace RitoBot
                 IniFile iniFile = new IniFile(AppDomain.CurrentDomain.BaseDirectory + "config\\settings.ini");
                 //General
                 Path2 = iniFile.IniReadValue("General", "LauncherPath");
-                OfficialGUI = Convert.ToBoolean(iniFile.IniReadValue("General", "OfficialGUI"));
-                TopKekGUI = Convert.ToBoolean(iniFile.IniReadValue("General", "TopkekGUI"));
+                LoadGUI = Convert.ToBoolean(iniFile.IniReadValue("General", "LoadGUI"));
                 maxBots = Convert.ToInt32(iniFile.IniReadValue("General", "MaxBots"));
                 maxLevel = Convert.ToInt32(iniFile.IniReadValue("General", "MaxLevel"));
                 championId = iniFile.IniReadValue("General", "ChampionPick").ToUpper();
@@ -294,7 +257,7 @@ namespace RitoBot
                 
                 var newfile = File.Create(configTxtLocation);
                 newfile.Close();
-                var content = "[General]\nLauncherPath=C:\\Riot Games\\League of Legends\\\nOfficialGUI=false\nTopkekGUI=false\nMaxBots=1\nMaxLevel=31\nChampionPick=Annie\nSpell1=Flash\nSpell2=Exhaust\nRndSpell=false\nReplaceConfig=false\nAutoUpdate=false\n\n[Account]\nRegion=EUW\nBuyBoost=false";
+                var content = "[General]\nLauncherPath=C:\\Riot Games\\League of Legends\\\nLoadGUI=false\nMaxBots=1\nMaxLevel=31\nChampionPick=Annie\nSpell1=Flash\nSpell2=Exhaust\nRndSpell=false\nReplaceConfig=false\nAutoUpdate=false\n\n[Account]\nRegion=EUW\nBuyBoost=false";
                 var separator = new string[] { "\n" };
                 string[] contentlines = content.Split(separator,StringSplitOptions.None);
                 File.WriteAllLines(configTxtLocation, contentlines);

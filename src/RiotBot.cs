@@ -394,16 +394,14 @@ namespace RitoBot
        
         private void updateStatus(string status, string accname)
         {
-            if (Program.OfficialGUI) Program.MainWindow.Print(string.Concat(new object[4]
+            if (Program.LoadGUI) Program.MainWindow.Print(string.Concat(new object[4]
               {     
                 (object) "[",
                 (object) accname,
                 (object) "]: ",
                 (object) status
               }));
-            if (!Program.OfficialGUI)
-            {
-                Console.WriteLine(string.Concat(new object[7]
+            Console.WriteLine(string.Concat(new object[7]
               {
                 (object) "[",
                 (object) DateTime.Now,
@@ -413,7 +411,6 @@ namespace RitoBot
                 (object) "]: ",
                 (object) status
               }));
-            }
         }        
         
         private async void RegisterNotifications()
@@ -622,7 +619,7 @@ namespace RitoBot
                     await httpClient.GetStringAsync(url);
                     string storeURL = "https://store." + region.Substring(0,3).ToLower() + "1.lol.riotgames.com/store/tabs/view/boosts/1";
                     await httpClient.GetStringAsync(storeURL);
-                    string purchaseURL = "https://store." + region.Substring(0, 3).ToLower() + "1.lol.riotgames.com/store/purchase/item";
+                    string purchaseURL = "https://store." + region.Substring(0,3).ToLower() + "1.lol.riotgames.com/store/purchase/item";
                     List<KeyValuePair<string, string>> storeItemList = new List<KeyValuePair<string, string>>();
                     storeItemList.Add(new KeyValuePair<string, string>("item_id", "boosts_2"));
                     storeItemList.Add(new KeyValuePair<string, string>("currency_type", "rp"));
