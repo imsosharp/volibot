@@ -618,7 +618,7 @@ namespace LoLLauncher
                 {
                     try
                     {
-                        long hbTime = (long)DateTime.Now.TimeOfDay.TotalMilliseconds;
+                        long hbTime = (long)(DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
                         string result = await PerformLCDSHeartBeat(accountID, sessionToken, heartbeatCount, DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMT-0700'"));
                         //int id = Invoke("loginService", "performLCDSHeartBeat", new object[] { accountID, sessionToken, heartbeatCount, DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMT-0700'") });
                         //Cancel(id); // Ignore result for now
@@ -626,7 +626,7 @@ namespace LoLLauncher
                         heartbeatCount++;
 
                         // Quick sleeps to shutdown the heartbeat quickly on a reconnect
-                        while ((long)DateTime.Now.TimeOfDay.TotalMilliseconds - hbTime < 120000)
+                        while ((long)(DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) - hbTime < 120000)
                             Thread.Sleep(100);
                     }
                     catch
