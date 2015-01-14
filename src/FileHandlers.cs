@@ -103,7 +103,7 @@ namespace RitoBot
         public static void AccountsTxt(string Username, string Password, string QueueType, string ChampionPick)
         {
 
-            var content = Username + "|" + Password + "|" + QueueType + "|" + ChampionPick;
+            var content = Username + "|" + Password + "|" + QueueType; // + "|" + ChampionPick;
             try
             {
                 string accs = File.ReadAllText(accountsTxtLocation);
@@ -127,5 +127,6 @@ namespace RitoBot
                 MessageBox.Show(e.ToString());
             }
         }
+        
     }
 }
