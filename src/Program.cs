@@ -34,18 +34,18 @@ namespace RitoBot
         public static ArrayList Accounts = new ArrayList();
         public static ArrayList Accounts2 = new ArrayList();
         public static int MaxBots = 1;
-        public static bool ReplaceConfig =  false;
+        public static bool ReplaceConfig;
         public static int ConnectedAccs = 0;
         public static string ChampionId = "";
         public static List<string> ChampionPickList = new List<string>();
         public static int MaxLevel = 31;
-        public static bool BuyBoost = false;
+        public static bool BuyBoost;
         public static bool RndSpell = true;
         public static string Spell1 = "flash";
         public static string Spell2 = "ignite";
-        public static string CVersion = "4.21.14_12_08_11_36";
-        public static bool AutoUpdate = false;
-        public static bool LoadGUI = false;
+        public static string CVersion = "5.1.15_01_09_17_50";
+        public static bool AutoUpdate;
+        public static bool LoadGUI;
         public static frm_MainWindow MainWindow = new frm_MainWindow();
 
         static void Main(string[] args)
@@ -72,9 +72,10 @@ namespace RitoBot
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine();
-                Console.WriteLine("Wrong LauncherPath. the path should look like this: C:\\Riot Games\\League of Legends\\ \n Please check config\\settings.ini, otherwise your LoL won't start.");
+                Console.WriteLine(@"Wrong LauncherPath. the path should look like this: C:\Riot Games\League of Legends\" );
+                Console.WriteLine(@"Please check config\settings.ini, otherwise your LoL won't start.");
                 Console.WriteLine();
-                System.Threading.Thread.Sleep(5000);
+                Thread.Sleep(5000);
                 LoadConfiguration();
             }
             Console.ForegroundColor = ConsoleColor.Green;
@@ -90,9 +91,9 @@ namespace RitoBot
                     try
                     {
                         Accounts2.RemoveAt(0);
-                        string Accs = acc;
+                        string accs = acc;
                         string[] stringSeparators = new string[] { "|" };
-                        var result = Accs.Split(stringSeparators, StringSplitOptions.None);
+                        var result = accs.Split(stringSeparators, StringSplitOptions.None);
                         curRunning += 1;
                         if (result[0].Contains("username"))
                         {
@@ -101,7 +102,7 @@ namespace RitoBot
                         }
                         if (result[2] != null)
                         {
-                            QueueTypes queuetype = (QueueTypes)System.Enum.Parse(typeof(QueueTypes), result[2]);
+                            QueueTypes queuetype = (QueueTypes)Enum.Parse(typeof(QueueTypes), result[2]);
                             RiotBot ritoBot = new RiotBot(result[0], result[1], Region, Path2, curRunning, queuetype);
                         }
                         else
@@ -139,9 +140,9 @@ namespace RitoBot
             }
             foreach (string acc in Accounts)
             {
-                string Accs = acc;
+                string accs = acc;
                 string[] stringSeparators = new string[] { "|" };
-                var result = Accs.Split(stringSeparators, StringSplitOptions.None);
+                var result = accs.Split(stringSeparators, StringSplitOptions.None);
                 curRunning += 1;
                 if(result[2] != null)
                 {

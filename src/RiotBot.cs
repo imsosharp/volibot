@@ -127,7 +127,7 @@ namespace RitoBot
 
         public async void connection_OnMessageReceived(object sender, object message)
         {
-            File.AppendAllText("log.txt", message.ToString());
+            File.AppendAllText("log.txt", DateTime.Now + " " + Accountname + ": " + message.ToString() + Environment.NewLine);
             if (message is GameDTO)
             {
                 GameDTO game = message as GameDTO;
@@ -286,8 +286,13 @@ namespace RitoBot
                             object obj = await this.Connection.AcceptPoppedGame(true);
                             break;
                         }
+
                         else
                             break;
+                    case "LEAVER_BUSTED":
+                        this.updateStatus("Leave busted, attempting to accept queue", Accountname);
+                        await this.Connection.AcceptPoppedGame(true);
+                        break;
                 }
             }
             else if (message is PlayerCredentialsDto)
