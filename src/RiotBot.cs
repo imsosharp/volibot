@@ -358,7 +358,10 @@ namespace RitoBot
                         {
                             updateStatus("Couldn't enter Q - " + m.PlayerJoinFailures.Summoner.Name + " : " + m.PlayerJoinFailures.ReasonFailed, Accountname);
                         }
-                        catch (Exception) { Console.WriteLine("Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type."); Connection.Disconnect(); Environment.Exit(0); }
+                        catch (Exception)
+                        {
+                            Console.WriteLine("Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type."); Connection.Disconnect(); ExeProcess.Kill(); Environment.Exit(0);
+                        }
                     }
                 }
                 else
@@ -369,6 +372,10 @@ namespace RitoBot
                         connection_OnMessageReceived(sender, eog);
                         ExeProcess.Exited -= exeProcess_Exited;
                         ExeProcess.Kill();
+                        if (ExeProcess.Responding)
+                        {
+                            Process.Start("taskkill /F /IM \"League of Legends.exe\"");
+                        }
                         LoginPacket = await this.Connection.GetLoginDataPacketForUser();
                         archiveSumLevel = sumLevel;
                         sumLevel = LoginPacket.AllSummonerData.SummonerLevel.Level;
