@@ -212,7 +212,7 @@ namespace RitoBot
                                     await Connection.SelectSpells(Spell1, Spell2);
 									
                                     var randAvailableChampsArray = AvailableChampsArray.Shuffle();
-                                    await Connection.SelectChampion(randAvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
+                                    await Connection.SelectChampion(Enums.championToId(Program.ChampionId));
                                     await Connection.ChampionSelectCompleted();
 
                                 }
