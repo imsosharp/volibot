@@ -53,19 +53,19 @@ namespace RitoBot
 {
     internal class RiotBot
     {
-        public LoginDataPacket loginPacket = new LoginDataPacket();
-        public GameDTO currentGame = new GameDTO();
-        public LoLConnection connection = new LoLConnection();
-        public List<ChampionDTO> availableChamps = new List<ChampionDTO>();
-        public LoLLauncher.RiotObjects.Platform.Catalog.Champion.ChampionDTO[] availableChampsArray;
-        public bool firstTimeInLobby = true;
-        public bool firstTimeInQueuePop = true;
-        public bool firstTimeInCustom = true;
-        public Process exeProcess;
+        public LoginDataPacket LoginPacket = new LoginDataPacket();
+        public GameDTO CurrentGame = new GameDTO();
+        public LoLConnection Connection = new LoLConnection();
+        public List<ChampionDTO> AvailableChamps = new List<ChampionDTO>();
+        public ChampionDTO[] AvailableChampsArray;
+        public bool FirstTimeInLobby = true;
+        public bool FirstTimeInQueuePop = true;
+        public bool FirstTimeInCustom = true;
+        public Process ExeProcess;
         public string ipath;
         public string Accountname;
         public string Password;
-        public int threadID;
+        public int ThreadID;
         public double sumLevel { get; set; }
         public double archiveSumLevel { get; set; }
         public double rpBalance { get; set; }
@@ -80,75 +80,76 @@ namespace RitoBot
             ipath = path;
             Accountname = username;
             Password = password;
-            threadID = threadid;
+            ThreadID = threadid;
             queueType = QueueType;
             region = reg;
-            connection.OnConnect += new LoLConnection.OnConnectHandler(this.connection_OnConnect);
-            connection.OnDisconnect += new LoLConnection.OnDisconnectHandler(this.connection_OnDisconnect);
-            connection.OnError += new LoLConnection.OnErrorHandler(this.connection_OnError);
-            connection.OnLogin += new LoLConnection.OnLoginHandler(this.connection_OnLogin);
-            connection.OnLoginQueueUpdate += new LoLConnection.OnLoginQueueUpdateHandler(this.connection_OnLoginQueueUpdate);
-            connection.OnMessageReceived += new LoLConnection.OnMessageReceivedHandler(this.connection_OnMessageReceived);
+            Connection.OnConnect += new LoLConnection.OnConnectHandler(this.connection_OnConnect);
+            Connection.OnDisconnect += new LoLConnection.OnDisconnectHandler(this.connection_OnDisconnect);
+            Connection.OnError += new LoLConnection.OnErrorHandler(this.connection_OnError);
+            Connection.OnLogin += new LoLConnection.OnLoginHandler(this.connection_OnLogin);
+            Connection.OnLoginQueueUpdate += new LoLConnection.OnLoginQueueUpdateHandler(this.connection_OnLoginQueueUpdate);
+            Connection.OnMessageReceived += new LoLConnection.OnMessageReceivedHandler(this.connection_OnMessageReceived);
             switch (region)
             {
                 case "EUW":
-                    connection.Connect(username, password, Region.EUW, Program.cversion);
+                    Connection.Connect(username, password, Region.EUW, Program.CVersion);
                     break;
                 case "EUNE":
-                    connection.Connect(username, password, Region.EUN, Program.cversion);
+                    Connection.Connect(username, password, Region.EUN, Program.CVersion);
                     break;
                 case "NA":
-                    connection.Connect(username, password, Region.NA, Program.cversion);
+                    Connection.Connect(username, password, Region.NA, Program.CVersion);
                     regionURL = "NA1";
                     break;
                 case "KR":
-                    connection.Connect(username, password, Region.KR, Program.cversion);
+                    Connection.Connect(username, password, Region.KR, Program.CVersion);
                     break;
                 case "BR":
-                    connection.Connect(username, password, Region.BR, Program.cversion);
+                    Connection.Connect(username, password, Region.BR, Program.CVersion);
                     break;
                 case "OCE":
-                    connection.Connect(username, password, Region.OCE, Program.cversion);
+                    Connection.Connect(username, password, Region.OCE, Program.CVersion);
                     break;
                 case "RU":
-                    connection.Connect(username, password, Region.RU, Program.cversion);
+                    Connection.Connect(username, password, Region.RU, Program.CVersion);
                     break;
                 case "TR":
-                    connection.Connect(username, password, Region.TR, Program.cversion);
+                    Connection.Connect(username, password, Region.TR, Program.CVersion);
                     break;
                 case "LAS":
-                    connection.Connect(username, password, Region.LAS, Program.cversion);
+                    Connection.Connect(username, password, Region.LAS, Program.CVersion);
                     break;
                 case "LAN":
-                    connection.Connect(username, password, Region.LAN, Program.cversion);
+                    Connection.Connect(username, password, Region.LAN, Program.CVersion);
                     break;
             }
         }
 
         public async void connection_OnMessageReceived(object sender, object message)
         {
+            File.AppendAllText("log.txt", message.ToString());
             if (message is GameDTO)
             {
                 GameDTO game = message as GameDTO;
                 switch (game.GameState)
                 {
                     case "CHAMP_SELECT":
-                        if (this.firstTimeInLobby)
+                        if (this.FirstTimeInLobby)
                         {
-                            firstTimeInLobby = false;
+                            FirstTimeInLobby = false;
                             updateStatus("In Champion Select", Accountname);
-                            object obj = await connection.SetClientReceivedGameMessage(game.Id, "CHAMP_SELECT_CLIENT");
+                            object obj = await Connection.SetClientReceivedGameMessage(game.Id, "CHAMP_SELECT_CLIENT");
                             if (queueType != QueueTypes.ARAM)
                             {
-                                if (Program.championId != "" && Program.championId != "RANDOM")
+                                if (Program.ChampionId != "" && Program.ChampionId != "RANDOM")
                                 {
 								
                                     int Spell1;
                                     int Spell2;
-                                    if (!Program.rndSpell)
+                                    if (!Program.RndSpell)
                                     {
-                                        Spell1 = Enums.spellToId(Program.spell1);
-                                        Spell2 = Enums.spellToId(Program.spell2);
+                                        Spell1 = Enums.spellToId(Program.Spell1);
+                                        Spell2 = Enums.spellToId(Program.Spell2);
                                     }
                                     else
                                     {
@@ -171,20 +172,21 @@ namespace RitoBot
                                         Spell2 = Convert.ToInt32(randomSpell2);
                                     }
 
-                                    await connection.SelectSpells(Spell1, Spell2);
-								
-                                    await connection.SelectChampion(Enums.championToId(Program.championId));
-                                    await connection.ChampionSelectCompleted();
+                                    await Connection.SelectSpells(Spell1, Spell2);
+                                    Random rand = new Random(Environment.TickCount);
+                                    var shuffledChampionPickList = Program.ChampionPickList.OrderBy(champion => rand.Next());
+                                    await Connection.SelectChampion(Enums.championToId(shuffledChampionPickList.FirstOrDefault()));
+                                    await Connection.ChampionSelectCompleted();
                                 }
-                                else if (Program.championId == "RANDOM")
+                                else if (Program.ChampionId == "RANDOM")
                                 {
 								
                                     int Spell1;
                                     int Spell2;
-                                    if (!Program.rndSpell)
+                                    if (!Program.RndSpell)
                                     {
-                                        Spell1 = Enums.spellToId(Program.spell1);
-                                        Spell2 = Enums.spellToId(Program.spell2);
+                                        Spell1 = Enums.spellToId(Program.Spell1);
+                                        Spell2 = Enums.spellToId(Program.Spell2);
                                     }
                                     else
                                     {
@@ -207,11 +209,11 @@ namespace RitoBot
                                         Spell2 = Convert.ToInt32(randomSpell2);
                                     }
 
-                                    await connection.SelectSpells(Spell1, Spell2);
+                                    await Connection.SelectSpells(Spell1, Spell2);
 									
-                                    var randAvailableChampsArray = availableChampsArray.Shuffle();
-                                    await connection.SelectChampion(randAvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
-                                    await connection.ChampionSelectCompleted();
+                                    var randAvailableChampsArray = AvailableChampsArray.Shuffle();
+                                    await Connection.SelectChampion(randAvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
+                                    await Connection.ChampionSelectCompleted();
 
                                 }
                                 else
@@ -219,10 +221,10 @@ namespace RitoBot
 								
                                     int Spell1;
                                     int Spell2;
-                                    if (!Program.rndSpell)
+                                    if (!Program.RndSpell)
                                     {
-                                        Spell1 = Enums.spellToId(Program.spell1);
-                                        Spell2 = Enums.spellToId(Program.spell2);
+                                        Spell1 = Enums.spellToId(Program.Spell1);
+                                        Spell2 = Enums.spellToId(Program.Spell2);
                                     }
                                     else
                                     {
@@ -245,10 +247,10 @@ namespace RitoBot
                                         Spell2 = Convert.ToInt32(randomSpell2);
                                     }
 
-                                    await connection.SelectSpells(Spell1, Spell2);
+                                    await Connection.SelectSpells(Spell1, Spell2);
 									
-                                    await connection.SelectChampion(availableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
-                                    await connection.ChampionSelectCompleted();
+                                    await Connection.SelectChampion(AvailableChampsArray.First(champ => champ.Owned || champ.FreeToPlay).ChampionId);
+                                    await Connection.ChampionSelectCompleted();
                                 }
                             }
                             break;
@@ -256,7 +258,7 @@ namespace RitoBot
                         else
                             break;
                     case "POST_CHAMP_SELECT":
-                        firstTimeInLobby = false;
+                        FirstTimeInLobby = false;
                         this.updateStatus("(Post Champ Select)", Accountname);
                         break;
                     case "PRE_CHAMP_SELECT":
@@ -273,15 +275,15 @@ namespace RitoBot
                         break;
                     case "TERMINATED":
                         this.updateStatus("Re-entering queue", Accountname);
-                        this.firstTimeInQueuePop = true;
+                        this.FirstTimeInQueuePop = true;
                         break;
                     case "JOINING_CHAMP_SELECT":
-                        if (this.firstTimeInQueuePop && game.StatusOfParticipants.Contains("1"))
+                        if (this.FirstTimeInQueuePop && game.StatusOfParticipants.Contains("1"))
                         {
                             this.updateStatus("Accepted Queue", Accountname);
-                            this.firstTimeInQueuePop = false;
-                            this.firstTimeInLobby = true;
-                            object obj = await this.connection.AcceptPoppedGame(true);
+                            this.FirstTimeInQueuePop = false;
+                            this.FirstTimeInLobby = true;
+                            object obj = await this.Connection.AcceptPoppedGame(true);
                             break;
                         }
                         else
@@ -301,11 +303,11 @@ namespace RitoBot
                 updateStatus("Launching League of Legends", Accountname);
                 new Thread((ThreadStart)(() =>
                 {
-                    exeProcess = Process.Start(startInfo);
-                    exeProcess.Exited += exeProcess_Exited;
-                    while (exeProcess.MainWindowHandle == IntPtr.Zero) ;
-                    exeProcess.PriorityClass = ProcessPriorityClass.Idle;
-                    exeProcess.EnableRaisingEvents = true;
+                    ExeProcess = Process.Start(startInfo);
+                    ExeProcess.Exited += exeProcess_Exited;
+                    while (ExeProcess.MainWindowHandle == IntPtr.Zero) ;
+                    ExeProcess.PriorityClass = ProcessPriorityClass.Idle;
+                    ExeProcess.EnableRaisingEvents = true;
                 })).Start();
             }
             else if (!(message is GameNotification) && !(message is SearchingForMatchNotification))
@@ -340,7 +342,7 @@ namespace RitoBot
                     }
 
                     matchParams.QueueIds = new Int32[1] { (int)queueType };
-                    LoLLauncher.RiotObjects.Platform.Matchmaking.SearchingForMatchNotification m = await connection.AttachToQueue(matchParams);
+                    LoLLauncher.RiotObjects.Platform.Matchmaking.SearchingForMatchNotification m = await Connection.AttachToQueue(matchParams);
                     if (m.PlayerJoinFailures == null)
                     {
                         this.updateStatus("In Queue: " + queueType.ToString(), Accountname);
@@ -351,7 +353,7 @@ namespace RitoBot
                         {
                             updateStatus("Couldn't enter Q - " + m.PlayerJoinFailures.Summoner.Name + " : " + m.PlayerJoinFailures.ReasonFailed, Accountname);
                         }
-                        catch (Exception) { Console.WriteLine("Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type."); connection.Disconnect(); }
+                        catch (Exception) { Console.WriteLine("Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type."); Connection.Disconnect(); Environment.Exit(0); }
                     }
                 }
                 else
@@ -360,14 +362,14 @@ namespace RitoBot
                     {
                         EndOfGameStats eog = new EndOfGameStats();
                         connection_OnMessageReceived(sender, eog);
-                        exeProcess.Exited -= exeProcess_Exited;
-                        exeProcess.Kill();
-                        loginPacket = await this.connection.GetLoginDataPacketForUser();
+                        ExeProcess.Exited -= exeProcess_Exited;
+                        ExeProcess.Kill();
+                        LoginPacket = await this.Connection.GetLoginDataPacketForUser();
                         archiveSumLevel = sumLevel;
-                        sumLevel = loginPacket.AllSummonerData.SummonerLevel.Level;
+                        sumLevel = LoginPacket.AllSummonerData.SummonerLevel.Level;
                         if (sumLevel != archiveSumLevel)
                         {
-                            levelUp();
+                            LevelUp();
                         }
                     }
                 }
@@ -378,9 +380,9 @@ namespace RitoBot
         {
            updateStatus("Restart League of Legends.", Accountname);
            Thread.Sleep(1000);
-           if (this.loginPacket.ReconnectInfo != null && this.loginPacket.ReconnectInfo.Game != null)
+           if (this.LoginPacket.ReconnectInfo != null && this.LoginPacket.ReconnectInfo.Game != null)
            {
-               this.connection_OnMessageReceived(sender, (object)this.loginPacket.ReconnectInfo.PlayerCredentials);
+               this.connection_OnMessageReceived(sender, (object)this.LoginPacket.ReconnectInfo.PlayerCredentials);
            }
            else
                this.connection_OnMessageReceived(sender, (object)new EndOfGameStats());
@@ -415,9 +417,9 @@ namespace RitoBot
         
         private async void RegisterNotifications()
         {
-            object obj1 = await this.connection.Subscribe("bc", this.connection.AccountID());
-            object obj2 = await this.connection.Subscribe("cn", this.connection.AccountID());
-            object obj3 = await this.connection.Subscribe("gn", this.connection.AccountID());
+            object obj1 = await this.Connection.Subscribe("bc", this.Connection.AccountID());
+            object obj2 = await this.Connection.Subscribe("cn", this.Connection.AccountID());
+            object obj3 = await this.Connection.Subscribe("gn", this.Connection.AccountID());
         }
         
         private void connection_OnLoginQueueUpdate(object sender, int positionInLine)
@@ -433,30 +435,30 @@ namespace RitoBot
             { 
                 updateStatus("Connecting...", Accountname);
                 this.RegisterNotifications();
-                this.loginPacket = await this.connection.GetLoginDataPacketForUser(); 
-                if (loginPacket.AllSummonerData == null)
+                this.LoginPacket = await this.Connection.GetLoginDataPacketForUser(); 
+                if (LoginPacket.AllSummonerData == null)
                 {
                     Random rnd = new Random();
                     String summonerName = Accountname;
                     if (summonerName.Length > 16)
                         summonerName = summonerName.Substring(0, 12) + new Random().Next(1000, 9999).ToString();
-                    LoLLauncher.RiotObjects.Platform.Summoner.AllSummonerData sumData = await connection.CreateDefaultSummoner(summonerName);
-                    loginPacket.AllSummonerData = sumData;
+                    LoLLauncher.RiotObjects.Platform.Summoner.AllSummonerData sumData = await Connection.CreateDefaultSummoner(summonerName);
+                    LoginPacket.AllSummonerData = sumData;
                     updateStatus("Created Summonername " + summonerName, Accountname);
                 }
-                sumLevel = loginPacket.AllSummonerData.SummonerLevel.Level;
-                string sumName = loginPacket.AllSummonerData.Summoner.Name;
-                double sumId = loginPacket.AllSummonerData.Summoner.SumId;
-                rpBalance = loginPacket.RpBalance;
-                if (sumLevel > Program.maxLevel || sumLevel == Program.maxLevel)
+                sumLevel = LoginPacket.AllSummonerData.SummonerLevel.Level;
+                string sumName = LoginPacket.AllSummonerData.Summoner.Name;
+                double sumId = LoginPacket.AllSummonerData.Summoner.SumId;
+                rpBalance = LoginPacket.RpBalance;
+                if (sumLevel > Program.MaxLevel || sumLevel == Program.MaxLevel)
                 {
-                    connection.Disconnect();
+                    Connection.Disconnect();
                     updateStatus("Summoner: " + sumName + " is already max level.", Accountname);
                     updateStatus("Log into new account.", Accountname);
-                    Program.lognNewAccount();
+                    Program.LoginNewAccount();
                     return;
                 }
-                if (rpBalance == 400.0 && Program.buyBoost)
+                if (rpBalance == 400.0 && Program.BuyBoost)
                 {
                     updateStatus("Buying XP Boost", Accountname);
                     try
@@ -504,12 +506,12 @@ namespace RitoBot
                 int randomIcon = availableIcons[index];
                 Console.WriteLine(" | Choose from List: " + randomIcon);
                 await connection.UpdateProfileIconId(randomIcon);*/
-                updateStatus("Logged in as " + loginPacket.AllSummonerData.Summoner.Name + " @ level " + loginPacket.AllSummonerData.SummonerLevel.Level, Accountname);
-                availableChampsArray = await connection.GetAvailableChampions();
-                LoLLauncher.RiotObjects.Team.Dto.PlayerDTO player = await connection.CreatePlayer();
-                if (this.loginPacket.ReconnectInfo != null && this.loginPacket.ReconnectInfo.Game != null)
+                updateStatus("Logged in as " + LoginPacket.AllSummonerData.Summoner.Name + " @ level " + LoginPacket.AllSummonerData.SummonerLevel.Level, Accountname);
+                AvailableChampsArray = await Connection.GetAvailableChampions();
+                PlayerDTO player = await Connection.CreatePlayer();
+                if (this.LoginPacket.ReconnectInfo != null && this.LoginPacket.ReconnectInfo.Game != null)
                 {
-                    this.connection_OnMessageReceived(sender, (object)this.loginPacket.ReconnectInfo.PlayerCredentials);
+                    this.connection_OnMessageReceived(sender, (object)this.LoginPacket.ReconnectInfo.PlayerCredentials);
                 }
                 else
                     this.connection_OnMessageReceived(sender, (object)new EndOfGameStats());
@@ -548,30 +550,30 @@ namespace RitoBot
         
         private void connection_OnDisconnect(object sender, EventArgs e)
         {
-            Program.connectedAccs -= 1;
-            Console.Title = " Current Connected: " + Program.connectedAccs;
+            Program.ConnectedAccs -= 1;
+            Console.Title = @" Current Connected: " + Program.ConnectedAccs;
             this.updateStatus("Disconnected", Accountname);
         }
        
         private void connection_OnConnect(object sender, EventArgs e)
         {
-            Program.connectedAccs += 1;
-            Console.Title = " Current Connected: " + Program.connectedAccs;
+            Program.ConnectedAccs += 1;
+            Console.Title = @" Current Connected: " + Program.ConnectedAccs;
         }
  
-        public void levelUp()
+        public void LevelUp()
         {
             updateStatus("Level Up: " + sumLevel, Accountname);
-            rpBalance = loginPacket.RpBalance;
-            if (sumLevel >= Program.maxLevel)
+            rpBalance = LoginPacket.RpBalance;
+            if (sumLevel >= Program.MaxLevel)
             {
-                connection.Disconnect();
+                Connection.Disconnect();
                 //bool connectStatus = await connection.IsConnected();
-                if (!connection.IsConnected()) {
-                Program.lognNewAccount(); 
+                if (!Connection.IsConnected()) {
+                Program.LoginNewAccount(); 
                 }
             }
-            if (rpBalance == 400.0 && Program.buyBoost)
+            if (rpBalance == 400.0 && Program.BuyBoost)
             {
                 updateStatus("Buying XP Boost", Accountname);
                 try
@@ -591,7 +593,7 @@ namespace RitoBot
             {
                 if (region == "EUW")
                 {
-                    string url = await connection.GetStoreUrl();
+                    string url = await Connection.GetStoreUrl();
                     HttpClient httpClient = new HttpClient();
                     Console.WriteLine(url);
                     await httpClient.GetStringAsync(url);
@@ -613,7 +615,7 @@ namespace RitoBot
                 }
                 else if (region == "EUNE")
                 {
-                    string url = await connection.GetStoreUrl();
+                    string url = await Connection.GetStoreUrl();
                     HttpClient httpClient = new HttpClient();
                     Console.WriteLine(url);
                     await httpClient.GetStringAsync(url);
@@ -635,7 +637,7 @@ namespace RitoBot
                 }
                 else if (region == "NA")
                 {
-                    string url = await connection.GetStoreUrl();
+                    string url = await Connection.GetStoreUrl();
                     HttpClient httpClient = new HttpClient();
                     Console.WriteLine(url);
                     await httpClient.GetStringAsync(url);
@@ -657,7 +659,7 @@ namespace RitoBot
                 }
                 else
                 {
-                    string url = await connection.GetStoreUrl();
+                    string url = await Connection.GetStoreUrl();
                     HttpClient httpClient = new HttpClient();
                     Console.WriteLine(url);
                     await httpClient.GetStringAsync(url);
