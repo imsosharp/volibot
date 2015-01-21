@@ -126,6 +126,25 @@ namespace RitoBot
             }
         }
 
+        public async void AntiBuster(MatchMakerParams matchParams)
+        {
+            
+            if (QueueFlag)
+                {
+                    Console.WriteLine(
+                        "Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type.");
+                    connection.Disconnect();
+                    Environment.Exit(0);
+                }
+                else
+                {
+
+                    this.updateStatus("waiting for leavebuster ;)", Accountname);
+                    Thread.Sleep(300000);
+                    await connection.AttachToQueue(matchParams);
+                }
+        }
+
         public async void connection_OnMessageReceived(object sender, object message)
         {
             if (message is GameDTO)
@@ -354,6 +373,7 @@ namespace RitoBot
                     }
                     else
                     {
+
                         try
                         {
                             updateStatus(
@@ -362,19 +382,7 @@ namespace RitoBot
                         }
                         catch (Exception)
                         {
-
-                            if (QueueFlag)
-                            {
-                                Console.WriteLine(
-                                    "Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type.");
-                                connection.Disconnect();
-                                Environment.Exit(0);
-                            }
-                            else
-                            {
-
-                                this.updateStatus("waiting for leavebuster ;)", Accountname);
-                            }
+                            AntiBuster(matchParams);
                         }
                     }
                 }
