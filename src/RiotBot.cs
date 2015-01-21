@@ -76,6 +76,8 @@ namespace RitoBot
         public string region { get; set; }
         public string regionURL;
         public bool QueueFlag;
+        public int LastAntiBusterAttempt = 0;
+        private MatchMakerParams mMParams;
 
         public RiotBot(string username, string password, string reg, string path, int threadid, QueueTypes QueueType)
         {
@@ -91,10 +93,6 @@ namespace RitoBot
             connection.OnLogin += new LoLConnection.OnLoginHandler(this.connection_OnLogin);
             connection.OnLoginQueueUpdate += new LoLConnection.OnLoginQueueUpdateHandler(this.connection_OnLoginQueueUpdate);
             connection.OnMessageReceived += new LoLConnection.OnMessageReceivedHandler(this.connection_OnMessageReceived);
-            var _heartbeatTimer = new System.Timers.Timer();
-            _heartbeatTimer.Elapsed += new ElapsedEventHandler(Heartbeat);
-            _heartbeatTimer.Interval = 120000;
-            _heartbeatTimer.Start();
             switch (region)
             {
                 case "EUW":
@@ -133,6 +131,8 @@ namespace RitoBot
 
         public async void AntiBuster(MatchMakerParams matchParams)
         {
+            //Thx to mah niggah Everance
+            //who made this possible
             
             if (QueueFlag)
                 {
@@ -145,8 +145,11 @@ namespace RitoBot
                 {
 
                     this.updateStatus("waiting for leavebuster ;)", Accountname);
-                    Thread.Sleep(300000);
-                    await connection.AttachToQueue(matchParams);
+                    if (Environment.TickCount - LastAntiBusterAttempt > 300000)
+                    {
+                        await connection.AttachToQueue(matchParams);
+                        LastAntiBusterAttempt = Environment.TickCount;
+                    }
                 }
         }
         private async void Heartbeat(object sender, ElapsedEventArgs e)
@@ -156,6 +159,10 @@ namespace RitoBot
                 {
                     var error = await connection.PerformLCDSHeartBeat(Convert.ToInt32(loginPacket.AllSummonerData.Summoner.AcctId), loginPacket.ReconnectInfo.PlayerCredentials.HandshakeToken, _heartbeatCount,
                         DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMT'z"));
+                    if (LastAntiBusterAttempt != 0 && Environment.TickCount - LastAntiBusterAttempt > 300000)
+                    {
+                        AntiBuster(mMParams);
+                    }
                     _heartbeatCount++;
                 }
                 catch(Exception ex)
@@ -402,7 +409,8 @@ namespace RitoBot
                         }
                         catch (Exception)
                         {
-                            AntiBuster(matchParams);
+                            mMParams = matchParams;
+                            AntiBuster(mMParams);
                         }
                     }
                 }
@@ -612,6 +620,10 @@ namespace RitoBot
        
         private void connection_OnConnect(object sender, EventArgs e)
         {
+            var _heartbeatTimer = new System.Timers.Timer();
+            _heartbeatTimer.Elapsed += new ElapsedEventHandler(Heartbeat);
+            _heartbeatTimer.Interval = 120000;
+            _heartbeatTimer.Start();
             Program.connectedAccs += 1;
             Console.Title = " Current Connected: " + Program.connectedAccs;
         }
