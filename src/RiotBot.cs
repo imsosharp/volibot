@@ -48,6 +48,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using LoLLauncher.RiotObjects.Platform.Summoner.Icon;
 using LoLLauncher.RiotObjects.Platform.Catalog.Icon;
+using System.Timers;
 
 namespace RitoBot
 {
@@ -90,6 +91,10 @@ namespace RitoBot
             connection.OnLogin += new LoLConnection.OnLoginHandler(this.connection_OnLogin);
             connection.OnLoginQueueUpdate += new LoLConnection.OnLoginQueueUpdateHandler(this.connection_OnLoginQueueUpdate);
             connection.OnMessageReceived += new LoLConnection.OnMessageReceivedHandler(this.connection_OnMessageReceived);
+            var _heartbeatTimer = new System.Timers.Timer();
+            _heartbeatTimer.Elapsed += new ElapsedEventHandler(Heartbeat);
+            _heartbeatTimer.Interval = 120000;
+            _heartbeatTimer.Start();
             switch (region)
             {
                 case "EUW":
@@ -142,6 +147,21 @@ namespace RitoBot
                     this.updateStatus("waiting for leavebuster ;)", Accountname);
                     Thread.Sleep(300000);
                     await connection.AttachToQueue(matchParams);
+                }
+        }
+        private async void Heartbeat(object sender, ElapsedEventArgs e)
+        {
+            int _heartbeatCount = 0;
+            try
+                {
+                    var error = await connection.PerformLCDSHeartBeat(Convert.ToInt32(loginPacket.AllSummonerData.Summoner.AcctId), loginPacket.ReconnectInfo.PlayerCredentials.HandshakeToken, _heartbeatCount,
+                        DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMTZ'"));
+                    _heartbeatCount++;
+                }
+                catch(Exception ex)
+                {
+                    updateStatus(ex.ToString(), Accountname);
+                    return;
                 }
         }
 
