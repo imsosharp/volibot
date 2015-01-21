@@ -27,7 +27,7 @@ namespace RitoBot
         {
             InitializeComponent();
             Print("VoliBot GUI RC2 Loaded.");
-            Print("Volibot's ready for Version: " + Program.CVersion.Substring(0,4));
+            Print("Volibot's ready for Version: " + Program.cversion.Substring(0,4));
             Print("brought to you by imsosharp.", 4);
         }
 
@@ -59,7 +59,7 @@ namespace RitoBot
                 if (QueueTypeInput.SelectedIndex == -1 && SelectChampionInput.SelectedIndex == -1) FileHandlers.AccountsTxt(newUserNameInput.Text, newPasswordInput.Text);
                 else if (SelectChampionInput.SelectedIndex == -1) FileHandlers.AccountsTxt(newUserNameInput.Text, newPasswordInput.Text, QueueTypeInput.SelectedItem.ToString());
                 else FileHandlers.AccountsTxt(newUserNameInput.Text, newPasswordInput.Text, QueueTypeInput.SelectedItem.ToString(), SelectChampionInput.SelectedItem.ToString());
-                Program.LoadAccounts();
+                Program.loadAccounts();
                 Thread.Sleep(1000);
                 queueLoop();
             }
@@ -68,23 +68,23 @@ namespace RitoBot
         private void saveBtn_Click(object sender, EventArgs e)
         {
             FileHandlers.SettingsIni(LauncherPathInput.Text, MaxBotsInput.Text, MaxLevelInput.Text, DefaultChampionInput.SelectedItem.ToString(), Spell1Input.SelectedItem.ToString(), Spell2Input.SelectedItem.ToString(), RegionInput.SelectedItem.ToString(), BuyBoostInput.SelectedItem.ToString());
-            Program.LoadConfiguration();
+            Program.loadConfiguration();
         }
 
         private void replaceConfigBtn_Click(object sender, EventArgs e)
         {
             Print("Game configuration was optimized successfuly!");
-            Program.GameCfg();
+            Program.gamecfg();
         }
 
         private void queueLoop()
         {
-            foreach (string acc in Program.Accounts)
+            foreach (string acc in Program.accounts)
             {
                 int curRunning = 0;
                 try
                 {
-                    Program.Accounts2.RemoveAt(0);
+                    Program.accounts2.RemoveAt(0);
                     string Accs = acc;
                     string[] stringSeparators = new string[] { "|" };
                     var result = Accs.Split(stringSeparators, StringSplitOptions.None);
@@ -106,8 +106,8 @@ namespace RitoBot
                         RiotBot ritoBot = new RiotBot(result[0], result[1], Program.Region, Program.Path2, curRunning, queuetype);
                         ShowAccount(result[0], result[1], "ARAM");
                     }
-                    Program.MainWindow.Text = " Volibot GUI | Currently connected: " + Program.ConnectedAccs;
-                    if (curRunning == Program.MaxBots)
+                    Program.MainWindow.Text = " Volibot GUI | Currently connected: " + Program.connectedAccs;
+                    if (curRunning == Program.maxBots)
                         break;
                 }
                 catch (Exception)

@@ -1,14 +1,20 @@
-using LoLLauncher.RiotObjects.Team;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using LoLLauncher.RiotObjects.Team;
 
 namespace LoLLauncher.RiotObjects.Platform.Statistics
 {
+
     public class EndOfGameStats : RiotGamesObject
     {
         public override string TypeName
         {
-            get { return this.type; }
+            get
+            {
+                return this.type;
+            }
         }
 
         private string type = "com.riotgames.platform.statistics.EndOfGameStats";
@@ -68,10 +74,10 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         public Int32 BasePoints { get; set; }
 
         [InternalName("reportGameId")]
-        public Int32 ReportGameId { get; set; }
+        public object ReportGameId { get; set; }
 
         [InternalName("difficulty")]
-        public String Difficulty { get; set; }
+        public object Difficulty { get; set; }
 
         [InternalName("gameLength")]
         public Double GameLength { get; set; }
@@ -86,13 +92,13 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         public TeamInfo OtherTeamInfo { get; set; }
 
         [InternalName("roomName")]
-        public String RoomName { get; set; }
+        public object RoomName { get; set; }
 
         [InternalName("customMinutesLeftToday")]
         public Int32 CustomMinutesLeftToday { get; set; }
 
         [InternalName("userId")]
-        public Int32 UserId { get; set; }
+        public object UserId { get; set; }
 
         [InternalName("pointsPenalties")]
         public List<object> PointsPenalties { get; set; }
@@ -134,7 +140,7 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         public Double LoyaltyBoostXpEarned { get; set; }
 
         [InternalName("roomPassword")]
-        public String RoomPassword { get; set; }
+        public object RoomPassword { get; set; }
 
         [InternalName("elo")]
         public Int32 Elo { get; set; }
@@ -175,7 +181,5 @@ namespace LoLLauncher.RiotObjects.Platform.Statistics
         [InternalName("customMsecsUntilReset")]
         public Double CustomMsecsUntilReset { get; set; }
 
-        [InternalName("rerollEarned")]
-        public Double RerollPointsEarned { get; set; }
     }
 }

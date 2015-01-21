@@ -557,7 +557,7 @@ namespace LoLLauncher
                 if (RitoBot.Program.AutoUpdate)
                 {
                     string newVersion = (string)result.GetTO("data").GetTO("rootCause").GetArray("substitutionArguments")[1];
-                    if (newVersion != RitoBot.Program.CVersion)
+                    if (newVersion != RitoBot.Program.cversion)
                     {
                         if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "config\\version.txt"))
                         {
