@@ -155,7 +155,7 @@ namespace RitoBot
             try
                 {
                     var error = await connection.PerformLCDSHeartBeat(Convert.ToInt32(loginPacket.AllSummonerData.Summoner.AcctId), loginPacket.ReconnectInfo.PlayerCredentials.HandshakeToken, _heartbeatCount,
-                        DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMTZ'"));
+                        DateTime.Now.ToString("ddd MMM d yyyy HH:mm:ss 'GMT'z"));
                     _heartbeatCount++;
                 }
                 catch(Exception ex)
