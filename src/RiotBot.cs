@@ -270,6 +270,7 @@ namespace RitoBot
                         break;
                     case "GameClientConnectedToServer":
                         this.updateStatus("Client connected to the server", Accountname);
+                        QueueFlag = true;
                         break;
                     case "IN_QUEUE":
                         this.updateStatus("In Queue", Accountname);
