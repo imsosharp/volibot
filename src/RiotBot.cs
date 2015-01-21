@@ -260,7 +260,6 @@ namespace RitoBot
                     case "POST_CHAMP_SELECT":
                         firstTimeInLobby = false;
                         this.updateStatus("(Post Champ Select)", Accountname);
-                        QueueFlag = true;
                         break;
                     case "PRE_CHAMP_SELECT":
                         this.updateStatus("(Pre Champ Select)", Accountname);
@@ -270,7 +269,6 @@ namespace RitoBot
                         break;
                     case "GameClientConnectedToServer":
                         this.updateStatus("Client connected to the server", Accountname);
-                        QueueFlag = true;
                         break;
                     case "IN_QUEUE":
                         this.updateStatus("In Queue", Accountname);
@@ -279,7 +277,6 @@ namespace RitoBot
                     case "TERMINATED":
                         this.updateStatus("Re-entering queue", Accountname);
                         this.firstTimeInQueuePop = true;
-                        QueueFlag = false;
                         break;
                     case "JOINING_CHAMP_SELECT":
                         if (this.firstTimeInQueuePop && game.StatusOfParticipants.Contains("1"))
@@ -368,15 +365,15 @@ namespace RitoBot
 
                             if (QueueFlag)
                             {
-                                this.updateStatus("waiting for leavebuster ;)", Accountname);
-                            }
-                            else
-                            {
-
                                 Console.WriteLine(
                                     "Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type.");
                                 connection.Disconnect();
                                 Environment.Exit(0);
+                            }
+                            else
+                            {
+
+                                this.updateStatus("waiting for leavebuster ;)", Accountname);
                             }
                         }
                     }
