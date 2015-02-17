@@ -283,13 +283,10 @@ namespace RitoBot
                             if (Program.championId != "" && Program.championId != "RANDOM" && Program.DodgeIfChampNotSelected)
                             {
                                 PlayerChampionSelectionDTO yourSelection = game.PlayerChampionSelections.Find(selection => selection.SummonerInternalName.Equals(summonerName.ToLower().Replace(" ", "")));
-                                if (yourSelection != null)
+                                if (yourSelection != null && yourSelection.ChampionId ==0)
                                 {
-                                    if (yourSelection.ChampionId != Enums.championToId(Program.championId))
-                                    {
-                                        updateStatus(Program.championId + " could not be selected, DCing to prevent random selection", Accountname);
-                                        connection.Disconnect();
-                                    }
+                                    updateStatus(Program.championId + " could not be selected, DCing to prevent random selection", Accountname);
+                                    connection.Disconnect();
                                 }
                             }
                             break;
