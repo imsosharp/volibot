@@ -1,4 +1,4 @@
-﻿/*
+/*
  * RiotBot.cs is part of the opensource VoliBot AutoQueuer project.
  * Credits to: shalzuth, Maufeat, imsosharp
  * Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
@@ -79,6 +79,7 @@ namespace RitoBot
         public int LastAntiBusterAttempt = 0;
         private MatchMakerParams mMParams;
 
+        private string summonerName;
         public RiotBot(string username, string password, string reg, string path, int threadid, QueueTypes QueueType)
         {
             ipath = path;
@@ -278,7 +279,18 @@ namespace RitoBot
                             break;
                         }
                         else
+                        {
+                            if (Program.championId != "" && Program.championId != "RANDOM" && Program.DodgeIfChampNotSelected)
+                            {
+                                PlayerChampionSelectionDTO yourSelection = game.PlayerChampionSelections.Find(selection => selection.SummonerInternalName.Equals(summonerName.ToLower().Replace(" ", "")));
+                                if (yourSelection != null && yourSelection.ChampionId ==0)
+                                {
+                                    updateStatus(Program.championId + " could not be selected, DCing to prevent random selection", Accountname);
+                                    connection.Disconnect();
+                                }
+                            }
                             break;
+                        }
                     case "POST_CHAMP_SELECT":
                         firstTimeInLobby = false;
                         this.updateStatus("(Post Champ Select)", Accountname);
@@ -545,6 +557,7 @@ namespace RitoBot
                 int randomIcon = availableIcons[index];
                 Console.WriteLine(" | Choose from List: " + randomIcon);
                 await connection.UpdateProfileIconId(randomIcon);*/
+                this.summonerName = loginPacket.AllSummonerData.Summoner.Name;
                 updateStatus("Logged in as " + loginPacket.AllSummonerData.Summoner.Name + " @ level " + loginPacket.AllSummonerData.SummonerLevel.Level, Accountname);
                 availableChampsArray = await connection.GetAvailableChampions();
                 LoLLauncher.RiotObjects.Team.Dto.PlayerDTO player = await connection.CreatePlayer();

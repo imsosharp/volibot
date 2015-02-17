@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Hello and welcome to the VoliBot AutoQueuer Project!
  * Credits to: shalzuth, Maufeat, imsosharp
  * Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
@@ -46,6 +46,7 @@ namespace RitoBot
         public static string cversion = "5.1.15_01_09_17_50";
         public static bool AutoUpdate = false;
         public static bool LoadGUI = false;
+        public static bool DodgeIfChampNotSelected = false;
         public static frm_MainWindow MainWindow = new frm_MainWindow();
 
         static void Main(string[] args)
@@ -172,6 +173,7 @@ namespace RitoBot
                 rndSpell = Convert.ToBoolean(iniFile.IniReadValue("General", "RndSpell"));
                 replaceConfig = Convert.ToBoolean(iniFile.IniReadValue("General", "ReplaceConfig"));
                 AutoUpdate = Convert.ToBoolean(iniFile.IniReadValue("General", "AutoUpdate"));
+                DodgeIfChampNotSelected = Convert.ToBoolean(iniFile.IniReadValue("General", "DodgeIfChampNotSelected"));
                 //Account
                 Region = iniFile.IniReadValue("Account", "Region").ToUpper();
                 buyBoost = Convert.ToBoolean(iniFile.IniReadValue("Account", "BuyBoost"));
