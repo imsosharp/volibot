@@ -1,4 +1,4 @@
-﻿/*
+/*
  * RiotBot.cs is part of the opensource VoliBot AutoQueuer project.
  * Credits to: shalzuth, Maufeat, imsosharp
  * Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
@@ -48,6 +48,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using LoLLauncher.RiotObjects.Platform.Summoner.Icon;
 using LoLLauncher.RiotObjects.Platform.Catalog.Icon;
+using System.Timers;
 
 namespace RitoBot
 {
@@ -74,7 +75,11 @@ namespace RitoBot
 
         public string region { get; set; }
         public string regionURL;
+        public bool QueueFlag;
+        public int LastAntiBusterAttempt = 0;
+        private MatchMakerParams mMParams;
 
+        private string summonerName;
         public RiotBot(string username, string password, string reg, string path, int threadid, QueueTypes QueueType)
         {
             ipath = path;
@@ -125,6 +130,25 @@ namespace RitoBot
             }
         }
 
+        public async void AntiBuster(MatchMakerParams matchParams)
+        {
+            //Thx to mah niggah Everance
+            //who made this possible
+            
+            if (QueueFlag)
+                {
+                    Console.WriteLine(
+                        "Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type.");
+                    connection.Disconnect();
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    this.updateStatus("Sorry, you're leavebusted :/ use LuxBot instead.", Accountname);
+                    connection.Disconnect();
+                }
+        }
+
         public async void connection_OnMessageReceived(object sender, object message)
         {
             if (message is GameDTO)
@@ -135,6 +159,7 @@ namespace RitoBot
                     case "CHAMP_SELECT":
                         if (this.firstTimeInLobby)
                         {
+                            QueueFlag = true;
                             firstTimeInLobby = false;
                             updateStatus("In Champion Select", Accountname);
                             object obj = await connection.SetClientReceivedGameMessage(game.Id, "CHAMP_SELECT_CLIENT");
@@ -254,7 +279,21 @@ namespace RitoBot
                             break;
                         }
                         else
+                        {
+                            if (Program.championId != "" && Program.championId != "RANDOM" && Program.DodgeIfChampNotSelected)
+                            {
+                                PlayerChampionSelectionDTO yourSelection = game.PlayerChampionSelections.Find(selection => selection.SummonerInternalName.Equals(summonerName.ToLower().Replace(" ", "")));
+                                if (yourSelection != null)
+                                {
+                                    if (yourSelection.ChampionId != Enums.championToId(Program.championId))
+                                    {
+                                        updateStatus(Program.championId + " could not be selected, DCing to prevent random selection", Accountname);
+                                        connection.Disconnect();
+                                    }
+                                }
+                            }
                             break;
+                        }
                     case "POST_CHAMP_SELECT":
                         firstTimeInLobby = false;
                         this.updateStatus("(Post Champ Select)", Accountname);
@@ -270,6 +309,7 @@ namespace RitoBot
                         break;
                     case "IN_QUEUE":
                         this.updateStatus("In Queue", Accountname);
+                        QueueFlag = true;
                         break;
                     case "TERMINATED":
                         this.updateStatus("Re-entering queue", Accountname);
@@ -286,6 +326,9 @@ namespace RitoBot
                         }
                         else
                             break;
+                    case "LEAVER_BUSTED":
+                        this.updateStatus("Leave busted", Accountname);
+                        break;
                 }
             }
             else if (message is PlayerCredentialsDto)
@@ -312,6 +355,7 @@ namespace RitoBot
             {
                 if (message is EndOfGameStats)
                 {
+                    EndOfGameStats msg = message as EndOfGameStats;
                     LoLLauncher.RiotObjects.Platform.Matchmaking.MatchMakerParams matchParams = new LoLLauncher.RiotObjects.Platform.Matchmaking.MatchMakerParams();
                     if (queueType == QueueTypes.INTRO_BOT)
                     {
@@ -347,11 +391,18 @@ namespace RitoBot
                     }
                     else
                     {
+
                         try
                         {
-                            updateStatus("Couldn't enter Q - " + m.PlayerJoinFailures.Summoner.Name + " : " + m.PlayerJoinFailures.ReasonFailed, Accountname);
+                            updateStatus(
+                                "Couldn't enter Q - " + m.PlayerJoinFailures.Summoner.Name + " : " +
+                                m.PlayerJoinFailures.ReasonFailed, Accountname);
                         }
-                        catch (Exception) { Console.WriteLine("Something went wrong, couldn't enter queue. Check accounts.txt for correct queue type."); connection.Disconnect(); }
+                        catch (Exception)
+                        {
+                            mMParams = matchParams;
+                            AntiBuster(mMParams);
+                        }
                     }
                 }
                 else
@@ -362,6 +413,11 @@ namespace RitoBot
                         connection_OnMessageReceived(sender, eog);
                         exeProcess.Exited -= exeProcess_Exited;
                         exeProcess.Kill();
+                        Thread.Sleep(500);
+                        if (exeProcess.Responding)
+                        {
+                            Process.Start("taskkill /F /IM \"League of Legends.exe\"");
+                        }
                         loginPacket = await this.connection.GetLoginDataPacketForUser();
                         archiveSumLevel = sumLevel;
                         sumLevel = loginPacket.AllSummonerData.SummonerLevel.Level;
@@ -504,6 +560,7 @@ namespace RitoBot
                 int randomIcon = availableIcons[index];
                 Console.WriteLine(" | Choose from List: " + randomIcon);
                 await connection.UpdateProfileIconId(randomIcon);*/
+                this.summonerName = loginPacket.AllSummonerData.Summoner.Name;
                 updateStatus("Logged in as " + loginPacket.AllSummonerData.Summoner.Name + " @ level " + loginPacket.AllSummonerData.SummonerLevel.Level, Accountname);
                 availableChampsArray = await connection.GetAvailableChampions();
                 LoLLauncher.RiotObjects.Team.Dto.PlayerDTO player = await connection.CreatePlayer();
