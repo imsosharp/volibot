@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Hello and welcome to the VoliBot AutoQueuer Project!
  * Credits to: shalzuth, Maufeat, imsosharp
  * Find assemblies for this AutoQueuer on LeagueSharp's official forum at:
@@ -43,9 +43,10 @@ namespace RitoBot
         public static bool rndSpell = true;
         public static string spell1 = "flash";
         public static string spell2 = "ignite";
-        public static string cversion = "4.21.14_12_08_11_36";
+        public static string cversion = "5.1.15_01_09_17_50";
         public static bool AutoUpdate = false;
         public static bool LoadGUI = false;
+        public static bool DodgeIfChampNotSelected = false;
         public static frm_MainWindow MainWindow = new frm_MainWindow();
 
         static void Main(string[] args)
@@ -55,11 +56,11 @@ namespace RitoBot
             Console.Title = "Volibot";
             Console.ForegroundColor = ConsoleColor.Green;
             Console.SetWindowSize(Console.WindowWidth + 5, Console.WindowHeight);
-            Console.WriteLine("=======================================");
+            Console.WriteLine("=========================================");
             Console.WriteLine("Maufeat's Volibot up-to-date for v" + cversion.Substring(0,4));
-            Console.WriteLine("--------All features enabled!----------");
-            Console.WriteLine("--------------imsosharp----------------");
-            Console.WriteLine("=======================================");
+            Console.WriteLine("----------All features enabled!----------");
+            Console.WriteLine("--------imsosharp & nongnoobjung---------");
+            Console.WriteLine("=========================================");
             Console.WriteLine();
             Console.WriteLine(getTimestamp() + "Loading config\\settings.ini");
             loadConfiguration();
@@ -172,6 +173,7 @@ namespace RitoBot
                 rndSpell = Convert.ToBoolean(iniFile.IniReadValue("General", "RndSpell"));
                 replaceConfig = Convert.ToBoolean(iniFile.IniReadValue("General", "ReplaceConfig"));
                 AutoUpdate = Convert.ToBoolean(iniFile.IniReadValue("General", "AutoUpdate"));
+                DodgeIfChampNotSelected = Convert.ToBoolean(iniFile.IniReadValue("General", "DodgeIfChampNotSelected"));
                 //Account
                 Region = iniFile.IniReadValue("Account", "Region").ToUpper();
                 buyBoost = Convert.ToBoolean(iniFile.IniReadValue("Account", "BuyBoost"));
